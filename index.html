@@ -24,7 +24,7 @@
   .lead { color: #b9c3d8; max-width: 62ch; margin: 0 0 28px; font-size: 17px; }
   .stats { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 32px; color: var(--muted); font-size: 13.5px; }
   .stats b { color: var(--text); font-size: 18px; font-weight: 650; }
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
   @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
   a.card {
     display: block; text-decoration: none; color: inherit; background: var(--panel);
@@ -46,27 +46,34 @@
 <body>
 <div class="wrap">
   <div class="badge">Roblox · визуальная новелла</div>
-  <h1>Станция «Тишина»</h1>
+  <h1>Станция «Тишина»: Жестокий сплав огня и ревности</h1>
   <p class="lead">
-    Техник прилетает на станцию, которая четыре месяца молчит. Станция не мертва — она
-    говорит голосом мёртвой женщины. Чтобы уйти живым, надо решить, что страшнее:
-    ответить сигналу или выключить его.
+    Станция молчит четыре месяца. Внутри — школа, которую ИИ переигрывает тринадцатый раз,
+    и два Артёма: настоящий, умерший в спортзале, и копия, которую собрали из его памяти.
+    Один из них выйдет наружу. Второй останется огнём.
   </p>
 
   <div class="stats">
-    <div><b>29</b> сцен</div>
+    <div><b>95</b> сцен</div>
+    <div><b>4</b> акта</div>
+    <div><b>5522</b> слова</div>
     <div><b>3</b> концовки</div>
-    <div><b>14</b> флагов</div>
-    <div><b>82</b> теста логики</div>
-    <div><b>0</b> мёртвых веток</div>
+    <div><b>50</b> огней на арене</div>
   </div>
 
   <div class="cards">
     <a class="card" href="story/preview.html">
       <h2>Прочитать сюжет →</h2>
-      <p>Играбельное превью прямо в браузере: сцены, выборы, журнал находок и все три
-        финала. Тот же <code>story.json</code>, что уходит в Roblox.</p>
+      <p>Играбельное превью прямо в браузере: 95 сцен, выборы, циклические анимации,
+        телепорт последней главы на огненную арену и все три финала. Тот же
+        <code>story.json</code>, что уходит в Roblox.</p>
       <div class="go">Открыть превью</div>
+    </a>
+    <a class="card" href="docs/КАРТА.md">
+      <h2>Карта игры →</h2>
+      <p>Связанность моделей по координатам: 9 кластеров, 5 авторских телепортов,
+        50 очагов огня и арена финала, вычисленная автоматически.</p>
+      <div class="go">Открыть карту</div>
     </a>
     <a class="card" href="uploader/index.html">
       <h2>Загрузить свою игру →</h2>
@@ -79,8 +86,9 @@
   <div class="note">
     Документация: <a href="docs/СЮЖЕТ.md">библия сюжета</a> ·
     <a href="docs/КАК_ЭТО_СВЯЗАТЬ.md">как вживить движок</a> ·
-    <a href="docs/ГРАФ.md">граф сцен</a>.
-    Собрать и проверить: <code>npm run build</code>, <code>npm test</code>.
+    <a href="docs/ГРАФ.md">граф сцен</a> · <a href="docs/КАРТА.md">карта и связанность моделей</a>.
+    Собрать и проверить: <code>npm run build</code>, <code>npm test</code>,
+    пересобрать карту: <code>npm run map</code>.
   </div>
 
   <footer>

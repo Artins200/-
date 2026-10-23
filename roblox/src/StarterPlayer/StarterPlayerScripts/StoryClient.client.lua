@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -15,9 +16,12 @@ local RequestState = remotes:WaitForChild("RequestState")
 local Choose = remotes:WaitForChild("Choose")
 local Restart = remotes:WaitForChild("Restart")
 local StateChanged = remotes:WaitForChild("StateChanged")
+local Teleport = remotes:WaitForChild("Teleport")
 
 -- Подписи флагов и предметов берём из того же StoryData, что и сервер.
-local StoryData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StoryData"))
+local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
+local StoryData = require(sharedFolder:WaitForChild("StoryData"))
+local Cinema = require(sharedFolder:WaitForChild("Cinema"))
 
 local COLORS = {
 	bg = Color3.fromRGB(9, 11, 18),
@@ -32,7 +36,7 @@ local COLORS = {
 	true_ = Color3.fromRGB(251, 191, 36),
 }
 
-local ACT_NAMES = { "Акт I", "Акт II", "Акт III" }
+local ACT_NAMES = { "Акт I. Тишина", "Акт II. Первого сентября", "Акт III. Сплав", "Глава 4. Сплав огня и ревности" }
 local TYPE_LABEL = { neutral = "НЕЙТРАЛЬНАЯ КОНЦОВКА", bad = "ПЛОХАЯ КОНЦОВКА", ["true"] = "ИСТИННАЯ КОНЦОВКА" }
 local TYPE_COLOR = { neutral = COLORS.accent, bad = COLORS.bad, ["true"] = COLORS.true_ }
 
@@ -171,6 +175,36 @@ local speakerLabel = new("TextLabel", {
 	Text = "",
 }, {})
 speakerLabel.Parent = story
+
+-- Кадры анимации сцены: моноширинная строка в правом верхнем углу панели.
+-- Проигрыватель циклический: когда кадры заканчиваются, он начинает сначала.
+local animLabel = new("TextLabel", {
+	Name = "Animation",
+	Position = UDim2.new(1, -8, 0, 0),
+	Size = UDim2.new(0, 240, 0, 40),
+	AnchorPoint = Vector2.new(1, 0),
+	BackgroundTransparency = 1,
+	Font = Enum.Font.Code,
+	TextSize = 18,
+	TextColor3 = Color3.fromRGB(251, 146, 60),
+	TextXAlignment = Enum.TextXAlignment.Right,
+	TextWrapped = true,
+	Text = "",
+}, {})
+animLabel.Parent = story
+
+local cinema = nil
+RunService.Heartbeat:Connect(function(dt)
+	if not cinema then
+		return
+	end
+	local frames = cinema:advance(math.min(dt, 0.25))
+	local parts = {}
+	for _, frame in ipairs(frames) do
+		table.insert(parts, frame.text or "")
+	end
+	animLabel.Text = table.concat(parts, "   ")
+end)
 
 local bodyScroll = new("ScrollingFrame", {
 	Name = "BodyScroll",
@@ -485,6 +519,81 @@ local function makeChoiceButton(choice, order)
 	return button
 end
 
+-- Кнопка телепорта последней главы. Координаты и доступность приходят с сервера.
+local function makeTeleportButton(teleport, order)
+	local available = teleport.available ~= false
+	local button = new("TextButton", {
+		LayoutOrder = order,
+		Size = UDim2.new(1, -6, 0, 56),
+		BackgroundColor3 = if available then Color3.fromRGB(120, 53, 15) else Color3.fromRGB(30, 28, 26),
+		BackgroundTransparency = if available then 0.05 else 0.5,
+		BorderSizePixel = 0,
+		AutoButtonColor = available,
+		Text = "",
+		Selectable = available,
+	}, {
+		corner(12),
+		new("UIStroke", {
+			Color = if available then Color3.fromRGB(251, 146, 60) else Color3.fromRGB(70, 62, 55),
+			Transparency = 0.15,
+			Thickness = 2,
+		}),
+		new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14) }),
+		new("TextLabel", {
+			Name = "Title",
+			Size = UDim2.new(1, 0, 0, 18),
+			BackgroundTransparency = 1,
+			Font = Enum.Font.GothamBold,
+			TextSize = 12,
+			TextColor3 = Color3.fromRGB(253, 186, 116),
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = string.upper(teleport.title or "ТЕЛЕПОРТ"),
+		}),
+		new("TextLabel", {
+			Name = "Label",
+			Position = UDim2.new(0, 0, 0, 20),
+			Size = UDim2.new(1, 0, 0, 26),
+			BackgroundTransparency = 1,
+			Font = Enum.Font.GothamMedium,
+			TextSize = 15,
+			TextColor3 = if available then Color3.fromRGB(255, 237, 213) else COLORS.locked,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = (teleport.label or "Телепорт") ..
+				(available and ("  ·  " .. tostring(teleport.targetName or "")) or ("  ·  " .. tostring(teleport.reason or "закрыто"))),
+		}),
+	})
+	if available then
+		button.MouseEnter:Connect(function()
+			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(154, 66, 18) }):Play()
+		end)
+		button.MouseLeave:Connect(function()
+			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(120, 53, 15) }):Play()
+		end)
+		button.Activated:Connect(function()
+			if busy then
+				return
+			end
+			if view and view.teleport then
+				Teleport:FireServer(view.id)
+				-- Вспышка: телепорт должен ощущаться, а не просто случиться.
+				local flash = new("Frame", {
+					Size = UDim2.fromScale(1, 1),
+					BackgroundColor3 = Color3.fromRGB(251, 146, 60),
+					BackgroundTransparency = 0.15,
+					BorderSizePixel = 0,
+					ZIndex = 50,
+				})
+				flash.Parent = root
+				TweenService:Create(flash, TweenInfo.new(0.9), { BackgroundTransparency = 1 }):Play()
+				task.delay(1, function()
+					flash:Destroy()
+				end)
+			end
+		end)
+	end
+	return button
+end
+
 local function renderJournal(progress)
 	clear(sideContent)
 	local order = 0
@@ -562,20 +671,39 @@ local function render(newView)
 	endScreen.Visible = false
 	story.BackgroundTransparency = 0.06
 
-	actLabel.Text = string.upper(ACT_NAMES[view.act] or ("Акт " .. tostring(view.act)))
-	sceneLabel.Text = view.scene
+	actLabel.Text = string.upper(view.chapter ~= "" and view.chapter or (ACT_NAMES[view.act] or ("Акт " .. tostring(view.act))))
+	sceneLabel.Text = view.scene .. (if view.notice then ("  ·  " .. tostring(view.notice)) else "")
 	speakerLabel.Text = view.speaker
 	speakerLabel.TextColor3 = Color3.fromHex(view.color or "#7dd3fc")
 	setBodyText(view.text, false)
 
 	clear(choicesScroll)
+
+	-- Анимации: новый проигрыватель на каждую сцену, цикл бесконечный.
+	if view.animations and #view.animations > 0 then
+		cinema = Cinema.new(view.animations, 4)
+		local first = cinema:advance(0)
+		local parts = {}
+		for _, frame in ipairs(first) do
+			table.insert(parts, frame.text or "")
+		end
+		animLabel.Text = table.concat(parts, "   ")
+	else
+		cinema = nil
+		animLabel.Text = ""
+	end
+
 	if view.isEnding then
 		showEnding(view.ending)
 		return
 	end
 
+	if view.teleport then
+		makeTeleportButton(view.teleport, 0).Parent = choicesScroll
+	end
+
 	for order, choice in ipairs(view.choices) do
-		makeChoiceButton(choice, order).Parent = choicesScroll
+		makeChoiceButton(choice, order + 1).Parent = choicesScroll
 	end
 
 	if view.progress then

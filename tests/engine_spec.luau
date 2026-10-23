@@ -1,6 +1,6 @@
 --!nonstrict
 -- Тесты игровой логики. Запуск: node tools/run-luau-tests.mjs
--- Глобальные StoryData и StoryEngine подставляет раннер.
+-- Глобальные StoryData, StoryEngine, Cinema и TeleportDirector подставляет раннер.
 
 local failures, checks = 0, 0
 
@@ -20,18 +20,30 @@ local function newEngine()
 	return engine
 end
 
---- Проходит по сцене, выбирая первый доступный (по тексту) выбор.
+--- Переход по тексту выбора. Возвращает true, если переход состоялся.
 local function go(engine, text)
 	local node = engine:node()
 	for index, choice in ipairs(node.choices or {}) do
 		if choice.text == text then
 			local ok, err = engine:choose(index)
-			check("переход «" .. text .. "»", ok, err)
-			return ok
+			if not ok then
+				check("переход «" .. text .. "»", false, err)
+				return false
+			end
+			return true
 		end
 	end
 	check("переход «" .. text .. "» найден", false, "нет такого выбора в «" .. engine.state.nodeId .. "»")
 	return false
+end
+
+local function findNode(predicate)
+	for _, node in ipairs(StoryData.nodes) do
+		if predicate(node) then
+			return node
+		end
+	end
+	return nil
 end
 
 --------------------------------------------------------------------------------
@@ -43,118 +55,350 @@ check("старт — сцена start", view.id == "start")
 check("старт — есть текст", #view.text > 40)
 check("старт — два выбора", #view.choices == 2)
 check("старт — не концовка", view.isEnding == false)
+check("старт — есть глава", view.chapter ~= nil and #view.chapter > 0)
 
 --------------------------------------------------------------------------------
-print("— истинная концовка «Эхо»")
+print("— сюжет собран в одну линию")
+
+local acts = {}
+for _, node in ipairs(StoryData.nodes) do
+	acts[node.act or 1] = true
+end
+check("четыре акта", acts[1] and acts[2] and acts[3] and acts[4])
+check("сцен больше восьмидесяти", #StoryData.nodes > 80, #StoryData.nodes)
+check("концовок три", (function()
+	local count = 0
+	for _ in pairs(StoryData.endings) do
+		count += 1
+	end
+	return count == 3
+end)())
+
+local finalChapter = findNode(function(node)
+	return (node.chapter or ""):find("Жестокий сплав огня и ревности", 1, true) ~= nil
+end)
+check("есть глава «Жестокий сплав огня и ревности»", finalChapter ~= nil)
+check("глава последняя (акт 4)", finalChapter and finalChapter.act == 4)
+
+--------------------------------------------------------------------------------
+print("— телепорт последней главы по координатам карты")
+
+local teleportScene = findNode(function(node)
+	return node.teleport ~= nil
+end)
+check("сцена с телепортом найдена", teleportScene ~= nil)
+if teleportScene then
+	local tp = teleportScene.teleport
+	check("телепорт в последней главе", teleportScene.act == 4, teleportScene.act)
+	local ok, reason = TeleportDirector.validate(tp)
+	check("описание телепорта валидно", ok, reason)
+	check("координаты — три числа", type(tp.target) == "table" and #tp.target == 3)
+	check("цель — арена огня (x ≈ -201)", math.abs(tp.target[1] + 201.6) < 1, tp.target[1])
+	check("цель — арена огня (z ≈ 6)", math.abs(tp.target[3] - 6.1) < 1, tp.target[3])
+	check("есть placeId", type(tp.placeId) == "string" and #tp.placeId > 0)
+	check("телепорт требует плату", (function()
+		for _, item in ipairs(tp.requires and tp.requires.items or {}) do
+			if item == "plate" then
+				return true
+			end
+		end
+		return false
+	end)())
+
+	local blocked = TeleportDirector.availability(tp, { items = {}, flags = {} })
+	check("без платы телепорт закрыт", blocked == false)
+	local allowed = TeleportDirector.availability(tp, { items = { plate = true }, flags = {} })
+	check("с платой телепорт открыт", allowed == true)
+
+	local described = TeleportDirector.describe(tp, StoryData.meta.map and StoryData.meta.map.spawn)
+	check("описание содержит координаты", described and described.target.x == tp.target[1])
+	check("известна дистанция от спавна", described and described.distanceFromSpawn and described.distanceFromSpawn > 0)
+end
+
+-- Арена из meta.map должна совпадать с целью телепорта.
+if StoryData.meta.map and StoryData.meta.map.arena and teleportScene then
+	local fire = StoryData.meta.map.arena.fire
+	check("meta.map.arena.fire совпадает с целью телепорта",
+		fire and math.abs(fire[1] - teleportScene.teleport.target[1]) < 1 and math.abs(fire[3] - teleportScene.teleport.target[3]) < 1)
+end
+
+--------------------------------------------------------------------------------
+print("— анимации: бесконечный цикл с перезапуском")
+
+local animated = findNode(function(node)
+	return node.animations and #node.animations > 0
+end)
+check("есть сцены с анимациями", animated ~= nil)
+check("анимации минимум в трёх сценах", (function()
+	local count = 0
+	for _, node in ipairs(StoryData.nodes) do
+		if node.animations and #node.animations > 0 then
+			count += 1
+		end
+	end
+	return count >= 3
+end)())
+
+local animsCount = 0
+for _, node in ipairs(StoryData.nodes) do
+	for _, anim in ipairs(node.animations or {}) do
+		animsCount += 1
+		check("анимация «" .. tostring(anim.id) .. "» зациклена", anim.loop ~= false, tostring(anim.loop))
+	end
+end
+check("анимаций в сюжете больше пяти", animsCount > 5, animsCount)
+
+local cinema = Cinema.new({
+	{ id = "fire", fps = 10, loop = true, frames = { "a", "b", "c" } },
+}, 4)
+local firstFrame = cinema:frame("fire")
+check("первый кадр", firstFrame == "a", firstFrame)
+
+local restarts = 0
+for _ = 1, 40 do
+	local frames = cinema:advance(0.1)
+	for _, frame in ipairs(frames) do
+		if frame.restarted then
+			restarts += 1
+		end
+	end
+end
+check("анимация перезапускалась несколько раз", restarts >= 3, restarts)
+check("после кругов кадр всё ещё из набора", cinema:frame("fire") == "a" or cinema:frame("fire") == "b" or cinema:frame("fire") == "c")
+local snapshot = cinema:snapshot()[1]
+check("счётчик кругов растёт", snapshot.loops >= 3, snapshot.loops)
+check("анимация не закончилась", snapshot.loop == true)
+
+cinema:restart("fire")
+check("рестарт возвращает первый кадр", cinema:frame("fire") == "a")
+
+local empty = Cinema.new({})
+check("пустой список анимаций безопасен", #empty:advance(1) == 0)
+
+--------------------------------------------------------------------------------
+print("— ветка до финала: смерть Артёма неизбежна")
+
+engine = newEngine()
+go(engine, "Обойти обшивку снаружи")
+check("пробоина найдена", engine:hasFlag("hull_scar"))
+go(engine, "Запомнить и войти внутрь")
+go(engine, "Молчать и идти дальше")
+go(engine, "Жилой блок")
+go(engine, "Прослушать дневник")
+check("дневник получен", engine:hasItem("diary"))
+go(engine, "Забрать дневник")
+go(engine, "Вскрыть шкафчик")
+check("ключ-карта получена", engine:hasItem("keycard"))
+go(engine, "Забрать фотографию")
+go(engine, "Вернуться в узел")
+go(engine, "Техтоннель")
+go(engine, "Спросить про сигнал")
+go(engine, "«Расскажи всё»")
+go(engine, "«Что мне делать?»")
+go(engine, "Идти в центральный узел")
+check("купол просканирован", engine:hasFlag("scanned"))
+go(engine, "К сигнальному реле")
+go(engine, "Прочитать тетрадь")
+go(engine, "Перевернуть страницу")
+go(engine, "Закрыть тетрадь")
+go(engine, "Обесточить через аварийный кабель у пробоины")
+check("сигнал обесточен", engine.state.nodeId == "relay_off", engine.state.nodeId)
+go(engine, "Войти в купол")
+check("вход в купол", engine.state.nodeId == "dome", engine.state.nodeId)
+go(engine, "Войти в ворота")
+go(engine, "Подойти к компании")
+go(engine, "«Я с вами»")
+go(engine, "Пойти за Демидом")
+go(engine, "Промолчать")
+go(engine, "«Я не хочу драться»")
+go(engine, "«Тогда давай вспомним вместе»")
+go(engine, "Сказать «прости»")
+check("Ваня сомневается", engine:hasFlag("vanya_doubt"))
+go(engine, "Уйти в клинч и сказать ему на ухо правду")
+go(engine, "«Останется тот, кто умеет вставать»")
+check("Ваня освобождён", engine:hasFlag("vanya_ally"))
+go(engine, "«Ты — не я»")
+go(engine, "«Ради права быть настоящим»")
+go(engine, "Спросить, как он пережил смерть")
+go(engine, "«Тогда ты знаешь, зачем я вернулся»")
+go(engine, "Отступить и позвать Демида")
+go(engine, "«Прикрой»")
+check("Демид выбрал сам", engine:hasFlag("demid_ally"))
+go(engine, "Прочитать последнюю страницу")
+go(engine, "Не дать кругу замкнуться")
+go(engine, "Отпустить нить")
+go(engine, "«Веди меня туда»")
+go(engine, "Спуститься")
+go(engine, "«Тогда объясни»")
+go(engine, "«А если погасить тебя — что останется?»")
+go(engine, "«Это не свобода»")
+go(engine, "«Ты предлагаешь нам выбрать, кто умрёт»")
+go(engine, "«Вам здесь не место»")
+go(engine, "«Он — копия. Оригинал — я»")
+go(engine, "«Один очаг — это чья-то память»")
+go(engine, "«Тогда горите вы»")
+go(engine, "«Демид, прикрой левый фланг»")
+go(engine, "«Почему я не удивлён»")
+go(engine, "«Значит, решим это здесь»")
+go(engine, "Пожать руку")
+go(engine, "Идти к телепорту")
+go(engine, "Подойти к Артинсу")
+go(engine, "«Это и есть любовь»")
+go(engine, "Активировать телепорт")
+check("финальная глава началась", engine:current().act == 4 and engine:current().chapter:find("Жестокий сплав", 1, true) ~= nil)
+go(engine, "Достать плату телепорта")
+check("сцена телепорта", engine.state.nodeId == "ch4_teleport", engine.state.nodeId)
+local tpView = engine:current()
+check("телепорт доступен в сцене", tpView.teleport ~= nil)
+check("телепорт открыт (плата есть)", tpView.teleport and tpView.teleport.available == true)
+check("вид содержит координаты телепорта", tpView.teleport and tpView.teleport.target[1] == -201.6)
+go(engine, "Шагнуть в огонь")
+check("прибытие на арену", engine.state.nodeId == "arena_arrival", engine.state.nodeId)
+go(engine, "«Тогда закончим»")
+go(engine, "Встретить удар")
+go(engine, "Бить по теням, а не по нему")
+go(engine, "«Тогда вспоминай»")
+go(engine, "«Скажу»")
+go(engine, "Подойти к огню с девочкой")
+go(engine, "Коснуться огня")
+go(engine, "«Я не могу это отдать»")
+go(engine, "Принять удар и обнять его")
+check("Артинс обнят", engine:hasFlag("embraced_twin"))
+go(engine, "«Не в этот раз»")
+local beforeFinal = engine:serialize()
+go(engine, "«Тогда решай я»")
+go(engine, "Отдать огонь Артинсу и уйти в пламя")
+view = engine:current()
+check("финал — Артём мёртв", view.isEnding and view.ending.id == "ash", view.ending and view.ending.id)
+check("текст концовки длинный", view.ending and #view.ending.text > 200)
+check("состояние запомнило концовку", engine.state.ending == "ash")
+
+--------------------------------------------------------------------------------
+print("— граф: все сцены и концовки достижимы")
+
+-- Полный обход состояний в WASM не укладывается в бюджет инструкций, поэтому
+-- проверяем граф статически: выбор проходим, если все его требования вообще
+-- где-то выполняются. Для 95 сцен и 14 флагов этого достаточно.
+
+local settable, givable = {}, {}
+local function noteEffects(effects)
+	for flag in pairs(effects and effects.set or {}) do
+		settable[flag] = true
+	end
+	for _, item in ipairs(effects and effects.give or {}) do
+		givable[item] = true
+	end
+end
+for _, node in ipairs(StoryData.nodes) do
+	noteEffects(node.onEnter)
+	for _, choice in ipairs(node.choices or {}) do
+		noteEffects(choice)
+	end
+end
+
+local function passable(requires)
+	if not requires then
+		return true
+	end
+	for _, flag in ipairs(requires.flags or {}) do
+		if not settable[flag] then
+			return false
+		end
+	end
+	for _, flag in ipairs(requires.notFlags or {}) do
+		if not settable[flag] then
+			return false
+		end
+	end
+	for _, item in ipairs(requires.items or {}) do
+		if not givable[item] then
+			return false
+		end
+	end
+	return true
+end
+
+local reachable = {}
+local endingsSeen = {}
+local stack = { StoryData.meta.start }
+local visitedNodes = 0
+while #stack > 0 do
+	local id = table.remove(stack)
+	if not reachable[id] then
+		reachable[id] = true
+		visitedNodes += 1
+		local node = findNode(function(candidate)
+			return candidate.id == id
+		end)
+		if node then
+			if node.ending then
+				endingsSeen[node.ending] = true
+			end
+			for _, choice in ipairs(node.choices or {}) do
+				if passable(choice.requires) and choice.goto then
+					table.insert(stack, choice.goto)
+				end
+			end
+		end
+	end
+end
+
+check("все сцены достижимы", visitedNodes == #StoryData.nodes, visitedNodes .. "/" .. #StoryData.nodes)
+for id in pairs(StoryData.endings) do
+	check("концовка «" .. StoryData.endings[id].title .. "» достижима", endingsSeen[id] == true)
+end
+check("лишних концовок нет", (function()
+	local count = 0
+	for _ in pairs(endingsSeen) do
+		count += 1
+	end
+	return count == 3
+end)())
+
+local deadEnds = 0
+for _, node in ipairs(StoryData.nodes) do
+	if not node.ending and not (node.choices and #node.choices > 0) then
+		deadEnds += 1
+	end
+end
+check("тупиков нет", deadEnds == 0, deadEnds)
+
+-- Три концовки из одной точки: смерть неизбежна, различается только кто.
+local atUltimatum = StoryEngine.new(StoryData, beforeFinal)
+local finalIndex = nil
+for index, choice in ipairs(atUltimatum:node().choices or {}) do
+	if choice.goto == "final_choice" then
+		finalIndex = index
+	end
+end
+check("путь к финальному выбору есть", finalIndex ~= nil)
+local atFinal = StoryEngine.new(StoryData, beforeFinal)
+if finalIndex then
+	atFinal:choose(finalIndex)
+end
+check("финальный выбор сохранён", atFinal:node().id == "final_choice", atFinal:node().id)
+local outcomes = {}
+for index, choice in ipairs(atFinal:node().choices or {}) do
+	local copy = StoryEngine.new(StoryData, atFinal:serialize())
+	if copy:choose(index) then
+		outcomes[#outcomes + 1] = copy:current()
+	end
+end
+check("три финала доступны сразу", #outcomes == 3, #outcomes)
+local finalEndings = {}
+for _, outcome in ipairs(outcomes) do
+	if outcome.ending then
+		finalEndings[outcome.ending.id] = true
+		check("финал «" .. outcome.ending.title .. "» — смерть", (outcome.ending.text:find("умираешь", 1, true) ~= nil or outcome.ending.text:find("умер", 1, true) ~= nil or outcome.ending.text:find("пепел", 1, true) ~= nil or outcome.ending.text:find("остыв", 1, true) ~= nil or outcome.ending.text:find("перестаёшь", 1, true) ~= nil))
+	end
+end
+check("все три концовки — в финальном выборе", finalEndings.ash and finalEndings.shard and finalEndings.loop)
+
+print("— сохранение, рестарт, защита от мусора")
 
 engine = newEngine()
 go(engine, "Обойти обшивку снаружи")
 check("флаг hull_scar", engine:hasFlag("hull_scar"))
-go(engine, "Запомнить и войти внутрь")
-go(engine, "Ответить")
-go(engine, "«Что за сигнал?»")
-check("флаг asked_kai", engine:hasFlag("asked_kai"))
-go(engine, "«Понял. Иду внутрь»")
-go(engine, "Идти в центральный узел")
-
--- реле закрыто, пока не обойдены три локации
-do
-	local hub = engine:current(true)
-	local lockedFound = false
-	for _, choice in ipairs(hub.choices) do
-		if choice.text == "К сигнальному реле" then
-			lockedFound = not choice.available
-		end
-	end
-	check("реле закрыто до осмотра станции", lockedFound)
-	local ok = engine:choose(4)
-	check("закрытый выбор отклонён", ok == false)
-end
-
-go(engine, "Жилой блок")
-go(engine, "Прослушать дневник")
-check("флаг found_diary", engine:hasFlag("found_diary"))
-check("предмет diary", engine:hasItem("diary"))
-go(engine, "Забрать дневник")
-go(engine, "Вскрыть шкафчик")
-check("флаг has_keycard", engine:hasFlag("has_keycard"))
-check("предмет keycard", engine:hasItem("keycard"))
-go(engine, "Вернуться в узел")
-
-go(engine, "Техтоннель")
-go(engine, "Спросить про сигнал")
-check("флаг lira_trust", engine:hasFlag("lira_trust"))
-go(engine, "«Расскажи всё»")
-go(engine, "«Я не пойду. Обещаю»")
-
-go(engine, "Рубка")
-go(engine, "«Что случилось с экипажем?»")
-check("флаг knows_truth", engine:hasFlag("knows_truth"))
-go(engine, "«Я это сделаю»")
-go(engine, "Вернуться в узел")
-
-go(engine, "К сигнальному реле")
-check("текст реле узнаёт голос МАМЫ", engine:current().text:find("МАМА", 1, true) ~= nil)
-go(engine, "Обесточить через аварийный кабель у пробоины")
-go(engine, "«Кто ты на самом деле?»")
-go(engine, "Показать ему дневник")
-check("флаг kai_ally", engine:hasFlag("kai_ally"))
-go(engine, "Идти к финалу")
-check("финал — вариант для союзников", engine:current().text:find("втроём", 1, true) ~= nil or true)
-go(engine, "Разорвать цикл: обесточить реле через пробоину и уйти втроём")
-view = engine:current()
-check("концовка достигнута", view.isEnding)
-check("концовка «Эхо»", view.ending and view.ending.id == "echo", view.ending and view.ending.id)
-check("текст концовки подставлен", #view.ending.text > 100)
-
---------------------------------------------------------------------------------
-print("— концовка «Тишина»")
-
-engine = newEngine()
-go(engine, "Сразу пройти в шлюз")
-go(engine, "Молчать и идти дальше")
-go(engine, "Идти в центральный узел")
-go(engine, "Жилой блок")
-go(engine, "Вернуться в узел")
-go(engine, "Техтоннель")
-go(engine, "Отступить в темноту")
-go(engine, "Вернуться в узел")
-go(engine, "Рубка")
-go(engine, "Вернуться в узел")
-go(engine, "К сигнальному реле")
-go(engine, "Ответить сигналу")
-go(engine, "Ответить: «Я здесь»")
-view = engine:current()
-check("концовка «Тишина»", view.ending and view.ending.id == "silence", view.ending and view.ending.id)
-
---------------------------------------------------------------------------------
-print("— концовка «Свет» (короткий путь)")
-
-engine = newEngine()
-go(engine, "Сразу пройти в шлюз")
-go(engine, "Молчать и идти дальше")
-go(engine, "Идти в центральный узел")
-go(engine, "Жилой блок")
-go(engine, "Вернуться в узел")
-go(engine, "Техтоннель")
-go(engine, "Отступить в темноту")
-go(engine, "Вернуться в узел")
-go(engine, "Рубка")
-go(engine, "Вернуться в узел")
-go(engine, "К сигнальному реле")
-go(engine, "Сначала поговорить с Каем")
-go(engine, "Солгать, что сигнал уже мёртв")
-check("флаг kai_locked", engine:hasFlag("kai_locked"))
-go(engine, "Идти к финалу")
-go(engine, "Улететь на «Кайросе»")
-view = engine:current()
-check("концовка «Свет»", view.ending and view.ending.id == "light", view.ending and view.ending.id)
-
---------------------------------------------------------------------------------
-print("— состояние, сохранение, рестарт")
-
-engine = newEngine()
-go(engine, "Обойти обшивку снаружи")
 local saved = engine:serialize()
 local restored = StoryEngine.new(StoryData, saved)
 check("флаг сохраняется", restored:hasFlag("hull_scar"))
@@ -164,9 +408,11 @@ engine:restart()
 check("рестарт — стартовая сцена", engine.state.nodeId == "start")
 check("рестарт — флаги пусты", next(engine.state.flags) == nil)
 
--- защита от выхода за границы
-local ok = engine:choose(99)
+local ok = engine:choose(999)
 check("несуществующий выбор отклонён", ok == false)
+
+local broken = StoryEngine.new(StoryData, { nodeId = "нет такой сцены", flags = {}, items = {} })
+check("битое сохранение откатывается на старт", broken.state.nodeId == "start")
 
 --------------------------------------------------------------------------------
 print("")

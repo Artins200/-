@@ -151,13 +151,34 @@ function StoryEngine:current(showLocked)
 	local view = {
 		id = node.id,
 		act = node.act or 1,
+		chapter = node.chapter or "",
 		scene = node.scene or "",
 		speaker = speaker.name or "",
 		color = speaker.color or "#ffffff",
 		text = self:interpolate(self:resolveText(node)),
 		choices = {},
 		isEnding = node.ending ~= nil,
+		animations = node.animations or {},
 	}
+
+	-- Телепорт последней главы: координаты приходят из карты neirogh.rbxl.
+	-- Доступность считается теми же правилами, что и обычный выбор.
+	if node.teleport then
+		local ok, reason = self:check(node.teleport.requires)
+		view.teleport = {
+			id = node.teleport.id,
+			title = node.teleport.title,
+			label = node.teleport.label,
+			zone = node.teleport.zone,
+			target = node.teleport.target,
+			targetName = node.teleport.targetName,
+			placeId = node.teleport.placeId,
+			animation = node.teleport.animation,
+			arrival = node.teleport.arrival,
+			available = ok,
+			reason = if ok then nil else (reason or node.teleport.lockedText),
+		}
+	end
 
 	if node.ending then
 		local ending = self.data.endings[node.ending]
@@ -232,6 +253,25 @@ function StoryEngine:restart()
 		ending = nil,
 	}
 	self:enter(self.data.meta.start)
+end
+
+--- Ключ состояния для отладки и обхода графа: сцена уже в state.nodeId,
+--- здесь — только накопленные флаги и предметы, отсортированные.
+function StoryEngine:flagsKey()
+	local flags, items = {}, {}
+	for key, value in pairs(self.state.flags) do
+		if value then
+			table.insert(flags, key)
+		end
+	end
+	for key, value in pairs(self.state.items) do
+		if value then
+			table.insert(items, key)
+		end
+	end
+	table.sort(flags)
+	table.sort(items)
+	return table.concat(flags, ",") .. "|" .. table.concat(items, ",")
 end
 
 --- Короткая сводка для отладки/DataStore.

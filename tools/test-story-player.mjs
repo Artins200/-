@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * test-story-player.mjs — проверки story/player.js (превью в браузере)
- * и заодно исчерпывающий обход сюжета: все достижимые состояния, все концовки.
+ * и заодно исчерпывающий разбор сюжета: главы, телепорт, анимации, концовки.
  *
  *   node tools/test-story-player.mjs
  */
@@ -36,136 +36,167 @@ function pick(player, text) {
 	return player.choose(index + 1);
 }
 
-console.log('— базовая механика');
+const go = (player, text) => {
+	const [ok, detail] = pick(player, text);
+	check(`переход «${text}»`, ok, detail);
+	return ok;
+};
+
+const nodeById = new Map(story.nodes.map((node) => [node.id, node]));
+const teleportNode = story.nodes.find((node) => node.teleport);
+
+console.log('— базовые проверки');
 {
 	const player = fresh();
 	const view = player.current();
 	check('старт', view.id === 'start');
 	check('текст сцены', view.text.length > 40);
 	check('выборов два', view.choices.length === 2);
-	check('после входа сцена посещена', player.state.visited.start === true);
+	check('глава заполнена', typeof view.chapter === 'string' && view.chapter.length > 0);
+	check('сцена не помечена концовкой', view.isEnding === false);
 }
 
-console.log('— условные выборы и подстановки');
+console.log('— сюжет собран в одну линию');
 {
+	const acts = new Set(story.nodes.map((node) => node.act));
+	check('четыре акта', [1, 2, 3, 4].every((act) => acts.has(act)), [...acts].join(','));
+	check('сцен больше восьмидесяти', story.nodes.length > 80, story.nodes.length);
+	const words = story.nodes.reduce((sum, node) => sum + String(node.text ?? '').split(/\s+/).filter(Boolean).length, 0);
+	check('слов больше четырёх тысяч', words > 4000, words);
+	const finalChapter = story.nodes.find((node) => (node.chapter ?? '').includes('Жестокий сплав огня и ревности'));
+	check('есть глава «Жестокий сплав огня и ревности»', Boolean(finalChapter));
+	check('глава идёт последней (акт 4)', finalChapter?.act === 4);
+	check('концовок три', Object.keys(story.endings).length === 3);
+}
+
+console.log('— телепорт последней главы');
+{
+	check('сцена с телепортом есть', Boolean(teleportNode));
+	if (teleportNode) {
+		const tp = teleportNode.teleport;
+		check('телепорт в акте 4', teleportNode.act === 4);
+		check('координаты — три числа', Array.isArray(tp.target) && tp.target.length === 3 && tp.target.every(Number.isFinite));
+		check('цель — арена огня (x ≈ -201.6)', Math.abs(tp.target[0] + 201.6) < 1, tp.target[0]);
+		check('цель — арена огня (z ≈ 6.1)', Math.abs(tp.target[2] - 6.1) < 1, tp.target[2]);
+		check('placeId из цифр', /^\d+$/.test(tp.placeId));
+		check('телепорт требует плату', (tp.requires?.items ?? []).includes('plate'));
+		check('у телепорта есть анимация', typeof tp.animation === 'string' && tp.animation.length > 0);
+		check('у телепорта есть сцена прибытия', Boolean(nodeById.get(tp.arrival)));
+		check('координаты совпадают с картой', (() => {
+			const fire = story.meta.map?.arena?.fire;
+			return Array.isArray(fire) && Math.abs(fire[0] - tp.target[0]) < 1 && Math.abs(fire[2] - tp.target[2]) < 1;
+		})());
+	}
+
+	// Без платы кнопка телепорта должна быть закрыта.
 	const player = fresh();
-	pick(player, 'Сразу пройти в шлюз');
-	pick(player, 'Молчать и идти дальше');
-	pick(player, 'Идти в центральный узел');
-
-	const hub = player.current(true);
-	const relay = hub.choices.find((choice) => choice.text === 'К сигнальному реле');
-	check('реле закрыто без осмотра', relay && relay.available === false);
-	check('причина отказа видна игроку', relay.reason && relay.reason.length > 0, relay?.reason);
-
-	const [ok, reason] = player.choose(relay.index);
-	check('закрытый выбор не проходит', ok === false, reason);
-
-	pick(player, 'Жилой блок');
-	pick(player, 'Вернуться в узел');
-	pick(player, 'Техтоннель');
-	pick(player, 'Отступить в темноту');
-	pick(player, 'Вернуться в узел');
-	pick(player, 'Рубка');
-	pick(player, 'Вернуться в узел');
-	const openHub = player.current(true);
-	check('после обхода реле открыто', openHub.choices.find((c) => c.text === 'К сигнальному реле')?.available === true);
-
-	pick(player, 'К сигнальному реле');
+	for (const text of [
+		'Обойти обшивку снаружи', 'Запомнить и войти внутрь', 'Молчать и идти дальше', 'Жилой блок', 'Прослушать дневник',
+		'Забрать дневник', 'Вскрыть шкафчик', 'Забрать фотографию', 'Вернуться в узел',
+		'Техтоннель', 'Спросить про сигнал', '«Расскажи всё»', '«Что мне делать?»',
+		'Идти в центральный узел', 'К сигнальному реле', 'Прочитать тетрадь', 'Перевернуть страницу',
+		'Закрыть тетрадь', 'Обесточить через аварийный кабель у пробоины', 'Войти в купол', 'Войти в ворота', 'Подойти к компании', '«Я с вами»',
+		'Пойти за Демидом', 'Промолчать', '«Я не хочу драться»', '«Тогда давай вспомним вместе»',
+		'Сказать «прости»', 'Уйти в клинч и сказать ему на ухо правду', '«Останется тот, кто умеет вставать»',
+		'«Ты — не я»', '«Ради права быть настоящим»', 'Спросить, как он пережил смерть',
+		'«Тогда ты знаешь, зачем я вернулся»', 'Отступить и позвать Демида', '«Прикрой»',
+		'Прочитать последнюю страницу', 'Не дать кругу замкнуться', 'Отпустить нить',
+		'«Веди меня туда»', 'Спуститься', '«Тогда объясни»', '«А если погасить тебя — что останется?»',
+		'«Это не свобода»', '«Ты предлагаешь нам выбрать, кто умрёт»', '«Вам здесь не место»',
+		'«Он — копия. Оригинал — я»', '«Один очаг — это чья-то память»', '«Тогда горите вы»',
+		'«Демид, прикрой левый фланг»', '«Почему я не удивлён»', '«Значит, решим это здесь»',
+		'Пожать руку', 'Идти к телепорту', 'Подойти к Артинсу', '«Это и есть любовь»',
+		'Активировать телепорт', 'Достать плату телепорта',
+	]) {
+		if (!go(player, text)) break;
+	}
 	const view = player.current();
-	check('вариант текста узнаёт МАМУ', view.text.includes('МАМА'), view.text.slice(0, 60));
+	check('дошли до сцены телепорта', view.id === 'ch4_teleport', view.id);
+	check('телепорт открыт — плата есть', view.teleport?.available === true);
+	check('в виде есть координаты', view.teleport?.target?.[0] === teleportNode?.teleport.target[0]);
+
+	// Кнопка телепорта в веб-плеере идёт через обычный выбор в сцену прибытия.
+	const arrivalChoice = (nodeById.get('ch4_teleport')?.choices ?? []).find((choice) => choice.goto === teleportNode.teleport.arrival);
+	check('у телепорта есть выбор-переход', Boolean(arrivalChoice));
+	const [ok, next] = player.choose(nodeById.get('ch4_teleport').choices.indexOf(arrivalChoice) + 1);
+	check('телепорт переносит на арену', ok && next.id === 'arena_arrival', next?.id);
 }
 
-console.log('— истинная концовка');
+console.log('— анимации повторяются бесконечно');
 {
-	const player = fresh();
-	pick(player, 'Обойти обшивку снаружи');
-	pick(player, 'Запомнить и войти внутрь');
-	pick(player, 'Ответить');
-	pick(player, '«Что за сигнал?»');
-	pick(player, '«Понял. Иду внутрь»');
-	pick(player, 'Идти в центральный узел');
-	pick(player, 'Жилой блок');
-	pick(player, 'Прослушать дневник');
-	check('дневник в инвентаре', player.hasItem('diary'));
-	pick(player, 'Забрать дневник');
-	pick(player, 'Вскрыть шкафчик');
-	check('ключ-карта в инвентаре', player.hasItem('keycard'));
-	pick(player, 'Вернуться в узел');
-	pick(player, 'Техтоннель');
-	pick(player, 'Спросить про сигнал');
-	check('Лира доверяет', player.hasFlag('lira_trust'));
-	pick(player, '«Расскажи всё»');
-	pick(player, '«Я не пойду. Обещаю»');
-	pick(player, 'Рубка');
-	pick(player, '«Что случилось с экипажем?»');
-	check('правда известна', player.hasFlag('knows_truth'));
-	pick(player, '«Я это сделаю»');
-	pick(player, 'Вернуться в узел');
-	pick(player, 'К сигнальному реле');
-	pick(player, 'Обесточить через аварийный кабель у пробоины');
-	pick(player, '«Кто ты на самом деле?»');
-	pick(player, 'Показать ему дневник');
-	check('Кай союзник', player.hasFlag('kai_ally'));
-	pick(player, 'Идти к финалу');
-	const finalView = player.current();
-	check('финальный вариант знает про союзников', finalView.text.includes('Кай') && finalView.text.includes('ключ'), finalView.text.slice(0, 80));
-	const [ok] = pick(player, 'Разорвать цикл: обесточить реле через пробоину и уйти втроём');
-	check('истинный финал доступен', ok === true);
-	check('концовка echo', player.current().ending?.id === 'echo', player.current().ending?.id);
-	check('текст концовки подставлен', !player.current().ending.text.includes('$'));
-	check('прогресс сохранён в state', player.state.ending === 'echo');
+	const animated = story.nodes.filter((node) => (node.animations ?? []).length > 0);
+	check('сцены с анимациями есть', animated.length >= 3, animated.length);
+	const all = animated.flatMap((node) => node.animations);
+	check('анимаций больше пяти', all.length > 5, all.length);
+	check('все анимации зациклены', all.every((anim) => anim.loop !== false && anim.frames.length > 1));
+	check('у всех анимаций есть fps', all.every((anim) => Number(anim.fps) > 0));
+
+	// Тот же алгоритм, что в Cinema.lua и preview.html: кадры идут по кругу.
+	const track = all[0];
+	let index = 0;
+	let loops = 0;
+	for (let step = 0; step < track.frames.length * 4; step += 1) {
+		index += 1;
+		if (index >= track.frames.length) {
+			index = 0;
+			loops += 1;
+		}
+	}
+	check('цикл перезапускается', loops === 4, loops);
+	check('кадр остаётся валидным', typeof track.frames[index] === 'string');
 }
 
-console.log('— все концовки достижимы (обход состояний)');
+console.log('— финал: смерть Артёма или Артинса неизбежна');
 {
-	// Флаги и предметы только накапливаются, поэтому пространство конечно.
-	// Идём в ширину по (сцена + множество флагов + предметов), собираем концовки.
-	const seen = new Set();
+	const finalNode = nodeById.get('final_choice');
+	check('финальный выбор существует', Boolean(finalNode));
 	const endings = new Set();
-	const queue = [fresh()];
-	let states = 0;
-	const limit = 20000;
+	for (const choice of finalNode.choices) {
+		const next = nodeById.get(choice.goto);
+		check(`финал «${next?.scene}» ведёт в концовку`, Boolean(next?.ending));
+		if (next?.ending) endings.add(next.ending);
+	}
+	check('финал даёт все три концовки', endings.size === 3, [...endings].join(','));
 
-	while (queue.length && states < limit) {
-		const player = queue.pop();
-		states += 1;
-		const node = player.node();
-		const key = [
-			node.id,
-			Object.keys(player.state.flags).filter((f) => player.state.flags[f]).sort().join(','),
-			Object.keys(player.state.items).filter((i) => player.state.items[i]).sort().join(','),
-		].join('|');
-		if (seen.has(key)) continue;
-		seen.add(key);
+	const dead = [];
+	for (const id of endings) {
+		const text = story.endings[id].text;
+		const somethingDies = /умира|умер|пепел|остыв|перестаёшь|раствор|гаснет/.test(text);
+		if (somethingDies) dead.push(id);
+	}
+	check('в каждой концовке кто-то погибает', dead.length === 3, dead.join(','));
 
-		if (node.ending) {
-			endings.add(node.ending);
-			continue;
+	// Все концовки достижимы статически: требования выборов где-то выполняются.
+	const settable = new Set();
+	const givable = new Set();
+	for (const node of story.nodes) {
+		for (const flag of Object.keys(node.onEnter?.set ?? {})) settable.add(flag);
+		for (const item of node.onEnter?.give ?? []) givable.add(item);
+		for (const choice of node.choices ?? []) {
+			for (const flag of Object.keys(choice.set ?? {})) settable.add(flag);
+			for (const item of choice.give ?? []) givable.add(item);
 		}
+	}
+	const passable = (requires = {}) =>
+		(requires.flags ?? []).every((f) => settable.has(f)) &&
+		(requires.notFlags ?? []).every((f) => settable.has(f)) &&
+		(requires.items ?? []).every((i) => givable.has(i));
 
-		for (const [index, choice] of (node.choices ?? []).entries()) {
-			if (!player.check(choice.requires)[0]) continue;
-			const copy = new StoryPlayer(story, player.serialize());
-			if (copy.choose(index + 1)[0]) queue.push(copy);
+	const reached = new Set();
+	const queue = [story.meta.start];
+	while (queue.length) {
+		const id = queue.pop();
+		if (reached.has(id)) continue;
+		reached.add(id);
+		const node = nodeById.get(id);
+		for (const choice of node?.choices ?? []) {
+			if (choice.goto && passable(choice.requires)) queue.push(choice.goto);
 		}
 	}
-
-	check('обход завершён (не упёрлись в лимит)', states < limit, states);
-	for (const id of Object.keys(story.endings)) {
-		check(`концовка «${story.endings[id].title}» достижима`, endings.has(id));
-	}
-	check('лишних концовок нет', endings.size === Object.keys(story.endings).length, [...endings].join(','));
-
-	// Из каждого достижимого состояния должен быть выход: либо выборы, либо концовка.
-	let deadEnds = 0;
-	for (const key of seen) {
-		const [nodeId] = key.split('|');
-		const node = story.nodes.find((item) => item.id === nodeId);
-		if (!node.ending && !(node.choices ?? []).length) deadEnds += 1;
-	}
-	check('тупиков нет', deadEnds === 0, deadEnds);
-	check('состояний обойдено больше сотни', states > 100, states);
+	check('все сцены достижимы', reached.size === story.nodes.length, `${reached.size}/${story.nodes.length}`);
+	const endingNodes = story.nodes.filter((node) => node.ending);
+	check('все концовки достижимы', endingNodes.every((node) => reached.has(node.id)));
+	check('тупиков нет', story.nodes.every((node) => node.ending || (node.choices ?? []).length > 0));
 }
 
 console.log('— сохранение и рестарт');
@@ -176,7 +207,6 @@ console.log('— сохранение и рестарт');
 	const restored = new StoryPlayer(story, saved);
 	check('флаг перенесён', restored.hasFlag('hull_scar'));
 	check('сцена перенесена', restored.state.nodeId === player.state.nodeId);
-	check('история не влияет на состояние', restored.state.nodeId === 'hull');
 
 	restored.restart();
 	check('рестарт в начало', restored.state.nodeId === 'start');

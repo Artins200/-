@@ -32,7 +32,7 @@ const ROBLOX_GLOBALS = [
 	'StarterGui', 'StarterPlayer', 'StarterPack', 'RunService', 'TweenService', 'UserInputService',
 	'HttpService', 'DataStoreService', 'CollectionService', 'SoundService', 'Lighting', 'MarketplaceService',
 	// подставляются раннером тестов перед запуском tests/engine_spec.luau
-	'StoryData', 'StoryEngine',
+	'StoryData', 'StoryEngine', 'Cinema', 'TeleportDirector',
 ];
 
 const analysis = await Analysis.create({ mode: 'nocheck', lint: false, globals: ROBLOX_GLOBALS });

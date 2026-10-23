@@ -91,13 +91,25 @@ export class StoryPlayer {
     const view = {
       id: node.id,
       act: node.act ?? 1,
+      chapter: node.chapter ?? '',
       scene: node.scene ?? '',
       speaker: speaker.name ?? '',
       color: speaker.color ?? '#ffffff',
       text: this.interpolate(this.resolveText(node)),
       choices: [],
       isEnding: Boolean(node.ending),
+      animations: node.animations ?? [],
     };
+
+    // Телепорт последней главы: координаты сняты с карты neirogh.rbxl.
+    if (node.teleport) {
+      const [ok, reason] = this.check(node.teleport.requires);
+      view.teleport = {
+        ...node.teleport,
+        available: ok,
+        reason: ok ? null : (reason ?? node.teleport.lockedText ?? 'закрыто'),
+      };
+    }
 
     if (node.ending) {
       const ending = this.data.endings[node.ending];

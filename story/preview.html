@@ -44,6 +44,21 @@
   button.choice:active:not(:disabled) { transform: translateY(1px); }
   button.choice:disabled { color: #6f7891; background: #1a1f2c; cursor: not-allowed; }
   button.choice .why { display: block; font-size: 12px; color: #6f7891; margin-top: 3px; }
+  .anim {
+    font: 16px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: #fb923c;
+    min-height: 24px; letter-spacing: 2px; margin: 6px 0 0; white-space: pre;
+  }
+  button.teleport {
+    display: grid; gap: 2px; text-align: left; padding: 12px 16px; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(90deg, #7c2d12, #431407); border: 1px solid #fb923c; color: #ffedd5;
+    font: inherit; font-size: 15px; box-shadow: 0 0 28px #f9731633; animation: warpPulse 2.4s ease-in-out infinite;
+  }
+  button.teleport:disabled { filter: grayscale(1); opacity: .55; cursor: not-allowed; animation: none; }
+  button.teleport .tp-title { font-size: 11px; letter-spacing: .16em; color: #fdba74; text-transform: uppercase; }
+  button.teleport .tp-target { font-size: 12px; color: #fed7aa99; }
+  @keyframes warpPulse { 50% { box-shadow: 0 0 44px #f9731666; border-color: #fdba74; } }
+  .flash { position: fixed; inset: 0; background: #fb923c; opacity: .85; pointer-events: none; z-index: 99; animation: flashOut .9s ease forwards; }
+  @keyframes flashOut { to { opacity: 0; } }
   aside .panel { padding: 18px; }
   aside h2 { margin: 0 0 10px; font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
   .tag {
@@ -90,6 +105,7 @@
         <div class="scene" id="sceneName"></div>
         <div class="speaker" id="speaker"></div>
         <div class="text" id="text"></div>
+        <div class="anim" id="anim" aria-hidden="true"></div>
         <hr />
         <div class="choices" id="choices"></div>
       </div>
@@ -124,7 +140,47 @@
 import { StoryPlayer } from './player.js';
 
 const $ = (id) => document.getElementById(id);
-const ACTS = ['Акт I', 'Акт II', 'Акт III'];
+const ACTS = ['Акт I. Тишина', 'Акт II. Первого сентября', 'Акт III. Сплав', 'Глава 4. Сплав огня и ревности'];
+
+// Циклический проигрыватель анимаций: когда кадры кончились — начинаем сначала.
+let animTimer = null;
+let animFrames = [];
+let animIndex = 0;
+let animFps = 4;
+
+function playAnimations(list) {
+  stopAnimations();
+  const tracks = (list ?? []).filter((a) => Array.isArray(a.frames) && a.frames.length);
+  if (!tracks.length) {
+    $('anim').textContent = '';
+    return;
+  }
+  animFps = Math.max(1, ...tracks.map((a) => Number(a.fps) || 4));
+  animFrames = tracks;
+  animIndex = 0;
+  drawAnimFrame();
+  animTimer = setInterval(() => {
+    animIndex += 1;
+    // Перезапуск по кругу — бесконечно, без остановки на последнем кадре.
+    if (animIndex >= Math.max(...animFrames.map((a) => a.frames.length))) animIndex = 0;
+    drawAnimFrame();
+  }, 1000 / animFps);
+}
+
+function drawAnimFrame() {
+  $('anim').textContent = animFrames
+    .map((track) => track.frames[animIndex % track.frames.length])
+    .join('   ');
+}
+
+function stopAnimations() {
+  if (animTimer) {
+    clearInterval(animTimer);
+    animTimer = null;
+  }
+  animFrames = [];
+  animIndex = 0;
+}
 
 let story;
 let player;
@@ -180,13 +236,37 @@ function render(view) {
   $('ending').classList.remove('show');
   $('scene').style.display = '';
 
-  $('act').textContent = ACTS[view.act - 1] ?? `Акт ${view.act}`;
+  $('act').textContent = view.chapter || ACTS[view.act - 1] || `Акт ${view.act}`;
   $('sceneName').textContent = view.scene;
   $('speaker').textContent = view.speaker;
   $('speaker').style.color = view.color;
 
   const choicesBox = $('choices');
   choicesBox.innerHTML = '';
+  playAnimations(view.animations);
+
+  if (view.teleport) {
+    const tp = view.teleport;
+    const button = document.createElement('button');
+    button.className = 'teleport';
+    button.disabled = !tp.available;
+    button.innerHTML = `<span class="tp-title">${tp.title ?? 'Последний телепорт'}</span>
+      <span>${tp.label ?? 'Телепортироваться'}</span>
+      <span class="tp-target">${tp.available ? `${tp.targetName ?? ''} · ${JSON.stringify(tp.target)}` : tp.reason ?? 'закрыто'}</span>`;
+    button.onclick = () => {
+      const node = player.node();
+      const index = (node.choices ?? []).findIndex((choice) => choice.goto === tp.arrival);
+      const flash = document.createElement('div');
+      flash.className = 'flash';
+      document.body.append(flash);
+      setTimeout(() => flash.remove(), 1000);
+      if (index >= 0) {
+        const [ok, result] = player.choose(index + 1);
+        if (ok) render(result);
+      }
+    };
+    choicesBox.append(button);
+  }
 
   typeText($('text'), view.text, () => {
     for (const choice of view.choices) {
