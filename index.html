@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Станция «Тишина» — визуальная новелла для Roblox</title>
+<style>
+  :root {
+    --bg: #090b12; --panel: #121622; --line: #2a3247; --text: #e6ebf5;
+    --muted: #8a93aa; --accent: #7dd3fc; --warn: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 48px 20px 72px;
+    background: radial-gradient(1100px 620px at 50% -12%, #1a2740 0%, var(--bg) 62%);
+    color: var(--text); font: 16px/1.6 ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  .badge {
+    display: inline-block; padding: 4px 11px; border-radius: 999px; background: #17233a;
+    color: var(--accent); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 18px;
+  }
+  h1 { margin: 0 0 10px; font-size: clamp(30px, 5vw, 46px); letter-spacing: -.8px; }
+  .lead { color: #b9c3d8; max-width: 62ch; margin: 0 0 28px; font-size: 17px; }
+  .stats { display: flex; gap: 22px; flex-wrap: wrap; margin-bottom: 32px; color: var(--muted); font-size: 13.5px; }
+  .stats b { color: var(--text); font-size: 18px; font-weight: 650; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
+  a.card {
+    display: block; text-decoration: none; color: inherit; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 16px; padding: 24px; transition: .18s;
+  }
+  a.card:hover { border-color: #46608c; background: #151c2c; transform: translateY(-2px); }
+  .card h2 { margin: 0 0 8px; font-size: 19px; }
+  .card p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+  .card .go { color: var(--accent); font-size: 14px; font-weight: 600; }
+  .note {
+    margin-top: 18px; border-left: 3px solid #33507a; background: #101725; border-radius: 8px;
+    padding: 12px 14px; color: #b7c1d6; font-size: 13.5px;
+  }
+  code { background: #0d111c; padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  footer { margin-top: 36px; color: #6d768c; font-size: 12.5px; }
+  footer a { color: #8fb6d8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">Roblox · визуальная новелла</div>
+  <h1>Станция «Тишина»</h1>
+  <p class="lead">
+    Техник прилетает на станцию, которая четыре месяца молчит. Станция не мертва — она
+    говорит голосом мёртвой женщины. Чтобы уйти живым, надо решить, что страшнее:
+    ответить сигналу или выключить его.
+  </p>
+
+  <div class="stats">
+    <div><b>29</b> сцен</div>
+    <div><b>3</b> концовки</div>
+    <div><b>14</b> флагов</div>
+    <div><b>82</b> теста логики</div>
+    <div><b>0</b> мёртвых веток</div>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="story/preview.html">
+      <h2>Прочитать сюжет →</h2>
+      <p>Играбельное превью прямо в браузере: сцены, выборы, журнал находок и все три
+        финала. Тот же <code>story.json</code>, что уходит в Roblox.</p>
+      <div class="go">Открыть превью</div>
+    </a>
+    <a class="card" href="uploader/index.html">
+      <h2>Загрузить свою игру →</h2>
+      <p>Перетащи <code>.rbxlx</code>, <code>.zip</code> или папку со скриптами — страница
+        вытащит все скрипты места и закоммитит их в репозиторий.</p>
+      <div class="go">Открыть загрузчик</div>
+    </a>
+  </div>
+
+  <div class="note">
+    Документация: <a href="docs/СЮЖЕТ.md">библия сюжета</a> ·
+    <a href="docs/КАК_ЭТО_СВЯЗАТЬ.md">как вживить движок</a> ·
+    <a href="docs/ГРАФ.md">граф сцен</a>.
+    Собрать и проверить: <code>npm run build</code>, <code>npm test</code>.
+  </div>
+
+  <footer>
+    Если страницы открыты не через локальный сервер, а файлом — превью сюжета не сможет
+    прочитать <code>story.json</code> (ограничение браузера). Запусти
+    <code>npm run serve</code> и открой <code>http://localhost:8080/</code>.
+  </footer>
+</div>
+</body>
+</html>

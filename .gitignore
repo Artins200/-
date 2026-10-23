@@ -1,0 +1,11 @@
+# зависимости инструментов
+node_modules/
+package-lock.json
+
+# временные файлы сборки и тестов
+.tmp/
+*.log
+
+# служебное
+.DS_Store
+Thumbs.db

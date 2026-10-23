@@ -1,0 +1,20 @@
+{
+  "name": "roblox-vn-story",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Визуальная новелла для Roblox: сюжет в JSON, Luau-движок, проверка связности",
+  "scripts": {
+    "build": "node tools/build-story.mjs",
+    "check": "node tools/build-story.mjs",
+    "check:syntax": "node tools/check-syntax.mjs",
+    "test": "node tools/build-story.mjs && node tools/test-builder.mjs && node tools/check-syntax.mjs && node tools/run-luau-tests.mjs && node tools/test-story-player.mjs && node tools/test-uploader.mjs",
+    "test:story": "node tools/build-story.mjs && node tools/test-builder.mjs && node tools/run-luau-tests.mjs && node tools/test-story-player.mjs",
+    "test:uploader": "node tools/test-uploader.mjs",
+    "serve": "python3 -m http.server 8080 --bind 0.0.0.0 --directory ."
+  },
+  "devDependencies": {
+    "@luau-rs/luau": "^0.739.0",
+    "@xmldom/xmldom": "^0.9.12"
+  }
+}

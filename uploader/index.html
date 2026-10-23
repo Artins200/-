@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Загрузка игры · Roblox VN</title>
+<style>
+  :root {
+    --bg: #090b12;
+    --panel: #121622;
+    --panel-2: #181d2c;
+    --line: #2a3247;
+    --text: #e6ebf5;
+    --muted: #8a93aa;
+    --accent: #7dd3fc;
+    --good: #a3e635;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -10%, #1a2338 0%, var(--bg) 60%);
+    color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 32px 18px 64px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; display: grid; gap: 18px; }
+  header h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.3px; }
+  header p { margin: 0; color: var(--muted); max-width: 70ch; }
+  .badge {
+    display: inline-block; margin-bottom: 14px; padding: 4px 10px; border-radius: 999px;
+    background: #17233a; color: var(--accent); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px;
+  }
+  .card h2 { margin: 0 0 4px; font-size: 16px; }
+  .card .hint { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+  .step { color: var(--accent); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .drop {
+    border: 2px dashed #33405c; border-radius: var(--radius); padding: 34px 20px; text-align: center;
+    transition: border-color .15s, background .15s; cursor: pointer; background: #0e1320;
+  }
+  .drop:hover, .drop.over { border-color: var(--accent); background: #101a2c; }
+  .drop strong { display: block; font-size: 17px; margin-bottom: 6px; }
+  .drop span { color: var(--muted); font-size: 13px; }
+  .drop input { display: none; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .row + .row { margin-top: 12px; }
+  label.field { display: grid; gap: 6px; font-size: 13px; color: var(--muted); flex: 1 1 220px; }
+  input[type=text], input[type=password], input[type=url], select {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: #0d111c; color: var(--text); font: inherit; font-size: 14px;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #2f5c86; outline-offset: 1px; }
+  textarea {
+    width: 100%; min-height: 74px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: #0d111c; color: var(--text); font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .check { display: flex; gap: 9px; align-items: center; color: var(--muted); font-size: 13px; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: #38bdf8; }
+  button {
+    padding: 11px 17px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--text); font: inherit; font-size: 14px; cursor: pointer; transition: .15s;
+  }
+  button:hover:not(:disabled) { border-color: #4a5b7d; background: #202840; }
+  button.primary { background: var(--accent); color: #071018; border-color: transparent; font-weight: 650; }
+  button.primary:hover:not(:disabled) { background: #a5e4ff; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.ghost { background: transparent; }
+  .list { display: grid; gap: 8px; margin-top: 16px; }
+  .file {
+    display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center;
+    background: #0e1320; border: 1px solid #1f2739; border-radius: 10px; padding: 9px 12px; font-size: 13px;
+  }
+  .file .path { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; word-break: break-all; }
+  .file .meta { grid-column: 1 / -1; color: var(--muted); font-size: 12px; }
+  .tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; white-space: nowrap; }
+  .tag.wait { background: #22304a; color: var(--muted); }
+  .tag.ok { background: #1d3a1f; color: var(--good); }
+  .tag.err { background: #3a1d1d; color: var(--bad); }
+  .tag.skip { background: #2d2a17; color: var(--warn); }
+  .log {
+    margin-top: 14px; max-height: 220px; overflow: auto; background: #0b0f19; border: 1px solid #1f2739;
+    border-radius: 10px; padding: 12px; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #b9c2d6; white-space: pre-wrap;
+  }
+  .note { border-left: 3px solid #33507a; padding: 10px 12px; background: #101725; border-radius: 8px; color: #b7c1d6; font-size: 13px; }
+  .note.warn { border-color: #6b5316; background: #1d1a0f; color: #e7d9a8; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } header h1 { font-size: 24px; } }
+  a { color: var(--accent); }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  code { background: #0d111c; padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">Roblox · визуальная новелла</div>
+    <h1>Положить игру в репозиторий</h1>
+    <p>
+      Перетащи сюда <code>.rbxlx</code>, <code>.rbxl</code> (Studio сохранит как XML — лучше .rbxlx),
+      <code>.zip</code> с проектом или отдельные <code>.lua</code>/<code>.luau</code> скрипты.
+      Страница разложит файлы по папкам, вытащит скрипты из места и закоммитит всё в GitHub.
+      Файл остаётся у тебя в браузере — уходит только то, что ты сам отправишь.
+    </p>
+  </header>
+
+  <section class="card">
+    <div class="step">Шаг 1</div>
+    <h2>Файлы</h2>
+    <p class="hint">Можно кидать папкой целиком. Поддерживаются .rbxlx (и .rbxmx), .zip, .lua, .luau, .json, .toml, .txt, .md, картинки и звуки.</p>
+    <label class="drop" id="drop">
+      <input type="file" id="picker" multiple />
+      <strong>Перетащи файлы или нажми сюда</strong>
+      <span>.rbxlx · .rbxl · .zip · .lua · .luau · ассеты</span>
+    </label>
+
+    <div class="row" style="margin-top:14px">
+      <label class="field">Куда положить
+        <input type="text" id="dest" value="game" />
+      </label>
+      <label class="field">Префикс для скриптов
+        <input type="text" id="destScripts" value="game/scripts" />
+      </label>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <label class="check"><input type="checkbox" id="extractScripts" checked /> вытащить скрипты из места в отдельные .lua</label>
+      <label class="check"><input type="checkbox" id="keepPlace" checked /> сохранить и сам файл места</label>
+      <label class="check"><input type="checkbox" id="cleanNames" checked /> безопасные имена (транслит, без пробелов)</label>
+    </div>
+
+    <div class="list" id="files"></div>
+    <div class="log" id="log" hidden></div>
+
+    <div class="row" style="margin-top:16px">
+      <button id="clear" class="ghost" disabled>Очистить</button>
+      <button id="download" class="ghost" disabled>Скачать .zip с результатом</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step">Шаг 2</div>
+    <h2>GitHub</h2>
+    <p class="hint">
+      Нужен fine-grained token с доступом <b>Contents: Read and write</b> только к этому репозиторию.
+      Токен живёт в памяти вкладки; «запомнить» кладёт его в localStorage этого браузера.
+    </p>
+    <div class="grid2">
+      <label class="field">Владелец (owner)<input type="text" id="owner" value="Artins200" placeholder="Artins200" /></label>
+      <label class="field">Репозиторий<input type="text" id="repo" value="-" placeholder="-" /></label>
+      <label class="field">Ветка<input type="text" id="branch" value="arena/d96d8f09-repo" placeholder="main" /></label>
+      <label class="field">Сообщение коммита<input type="text" id="message" value="game: загрузка файла игры и скриптов" /></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label class="field" style="flex: 2 1 320px">Токен (ghp_… / github_pat_…)
+        <input type="password" id="token" autocomplete="off" placeholder="не покидает браузер" />
+      </label>
+      <label class="check" style="margin-top:22px"><input type="checkbox" id="remember" /> запомнить</label>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button id="verify">Проверить доступ</button>
+      <button id="upload" class="primary" disabled>Закоммитить в GitHub</button>
+    </div>
+    <div class="note" style="margin-top:14px">
+      Если токена нет — нажми «Скачать .zip с результатом» и закинь архив в репозиторий руками.
+      Страница не отправляет файлы никуда, кроме <code>api.github.com</code>.
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="step">Шаг 3</div>
+    <h2>После загрузки</h2>
+    <div class="note warn" style="margin-bottom:12px">
+      <b>.rbxl</b> — бинарный формат, его нельзя разобрать в браузере. В Studio: <b>File → Save As → Roblox Location Files (*.rbxlx)</b>.
+      Сам файл загрузить можно, но скрипты из него не извлекутся.
+    </div>
+    <p class="hint" style="margin:0">
+      Скрипты лягут в <code>game/scripts/&lt;имя места&gt;/…</code> с суффиксами
+      <code>.server.lua</code> / <code>.client.lua</code> / <code>.lua</code> — как в Rojo.
+      Дальше сюжет правится в <code>story/story.json</code>, а <code>npm run build</code>
+      пересобирает <code>StoryData.lua</code> и граф. Детали — в <code>docs/СЮЖЕТ.md</code>.
+    </p>
+  </section>
+</div>
+
+<script>
+/* === CORE START === */
+// Всё ниже не зависит от DOM страницы и тестируется в Node (tools/test-uploader.mjs).
+
+const SCRIPT_CLASS_EXT = {
+  Script: '.server.lua',
+  LocalScript: '.client.lua',
+  ModuleScript: '.lua',
+};
+
+const TEXT_EXT = /\.(lua|luau|json|toml|txt|md|rbxmx|rbxlx|xml|csv|yml|yaml|cfg|ini)$/i;
+const IMAGE_EXT = /\.(png|jpg|jpeg|webp|gif|bmp|tga|svg)$/i;
+const AUDIO_EXT = /\.(mp3|ogg|wav|flac)$/i;
+
+const TRANSLIT = {
+  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'i',
+  к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f',
+  х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'iu', я: 'ia',
+  і: 'i', ї: 'i', є: 'e', ґ: 'g',
+};
+
+function transliterate(text) {
+  return text.replace(/[\u0400-\u04FF]/g, (char) => {
+    const lower = char.toLowerCase();
+    const mapped = TRANSLIT[lower];
+    if (mapped === undefined) return '_';
+    return char === lower ? mapped : mapped.charAt(0).toUpperCase() + mapped.slice(1);
+  });
+}
+
+function sanitizeSegment(name, clean) {
+  let out = String(name ?? '').trim();
+  if (!out) out = 'unnamed';
+  out = out.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_');
+  if (!clean) return out;
+  // Rojo и GitHub: латиница, цифры, . _ - — остальное в подчёркивания.
+  out = transliterate(out)
+    .replace(/[^A-Za-z0-9._-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^[._]+|[._]+$/g, '');
+  return out || 'unnamed';
+}
+
+function elementChildren(el) {
+  const out = [];
+  for (let node = el.firstChild; node; node = node.nextSibling) {
+    if (node.nodeType === 1) out.push(node);
+  }
+  return out;
+}
+
+function firstChildByName(el, name) {
+  for (const child of elementChildren(el)) {
+    if ((child.nodeName || child.tagName || '').toLowerCase() === name.toLowerCase()) return child;
+  }
+  return null;
+}
+
+function readItemProperties(itemEl) {
+  const props = {};
+  const propsEl = firstChildByName(itemEl, 'Properties');
+  if (!propsEl) return props;
+  for (const propEl of elementChildren(propsEl)) {
+    const key = propEl.getAttribute && propEl.getAttribute('name');
+    if (!key) continue;
+    props[key] = propEl.textContent ?? '';
+  }
+  return props;
+}
+
+/**
+ * Разбирает XML места Roblox (.rbxlx / .rbxmx) и достаёт все скрипты.
+ * @returns {{items: Array<{className:string,name:string,path:string[],source:string}>, classCount: Object}}
+ */
+function parseRbxlx(xmlText) {
+  if (!xmlText || !/<roblox[\s>]/i.test(xmlText.slice(0, 4000))) {
+    throw new Error('это не XML-место Roblox (нет корня <roblox>)');
+  }
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  const root = doc && doc.documentElement;
+  if (!root) throw new Error('XML не разобран');
+  const parserError =
+    root.nodeName.toLowerCase().includes('parsererror') ||
+    (doc.getElementsByTagName && doc.getElementsByTagName('parsererror').length > 0);
+  if (parserError) throw new Error('XML повреждён');
+
+  const items = [];
+  const classCount = {};
+
+  const visit = (itemEl, trail) => {
+    const className = itemEl.getAttribute('class') || 'Instance';
+    const props = readItemProperties(itemEl);
+    const name = props.Name || className;
+    const path = [...trail, name];
+
+    if (SCRIPT_CLASS_EXT[className] && typeof props.Source === 'string') {
+      items.push({ className, name, path: trail.slice(), source: props.Source });
+    }
+    classCount[className] = (classCount[className] ?? 0) + 1;
+
+    for (const child of elementChildren(itemEl)) {
+      if ((child.nodeName || '').toLowerCase() === 'item') visit(child, path);
+    }
+  };
+
+  for (const child of elementChildren(root)) {
+    if ((child.nodeName || '').toLowerCase() === 'item') visit(child, []);
+  }
+
+  return { items, classCount };
+}
+
+/** Скрипты места -> файлы {path, text}. Пути повторяют иерархию объектов. */
+function rbxlxToFiles(xmlText, { baseName, destScripts, cleanNames = true }) {
+  const { items, classCount } = parseRbxlx(xmlText);
+  const rootDir = `${destScripts.replace(/\/+$/, '')}/${sanitizeSegment(baseName, cleanNames)}`;
+  const files = [];
+  const manifest = [];
+
+  for (const item of items) {
+    const dirParts = item.path.map((part) => sanitizeSegment(part, cleanNames));
+    const fileName = sanitizeSegment(item.name, cleanNames) + SCRIPT_CLASS_EXT[item.className];
+    const cleaned = [rootDir, ...dirParts, fileName].join('/').replace(/\/+/g, '/');
+    files.push({ path: cleaned, text: item.source });
+    manifest.push({
+      class: item.className,
+      name: item.name,
+      instancePath: item.path.join(' / '),
+      file: cleaned,
+      lines: item.source.split('\n').length,
+    });
+  }
+
+  files.push({
+    path: `${rootDir}/_manifest.json`,
+    text: JSON.stringify(
+      {
+        source: baseName,
+        generatedBy: 'uploader/index.html',
+        scriptCount: items.length,
+        classCount,
+        scripts: manifest,
+      },
+      null,
+      2,
+    ),
+    generated: true,
+  });
+
+  return { files, scriptCount: items.length, classCount };
+}
+
+/* ---------- zip: чтение ---------- */
+
+function readU16(view, offset) { return view.getUint16(offset, true); }
+function readU32(view, offset) { return view.getUint32(offset, true); }
+
+function findEndOfCentralDirectory(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const minOffset = Math.max(0, bytes.length - 0xffff - 22);
+  for (let offset = bytes.length - 22; offset >= minOffset; offset -= 1) {
+    if (readU32(view, offset) === 0x06054b50) return offset;
+  }
+  return -1;
+}
+
+async function inflateRaw(bytes) {
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error('браузер не умеет распаковывать zip (нет DecompressionStream)');
+  }
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+/** Читает zip и возвращает [{name, bytes}]. Понимает stored и deflate. */
+async function unzip(bytes, { maxEntries = 2000, maxBytes = 80 * 1024 * 1024 } = {}) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const eocd = findEndOfCentralDirectory(bytes);
+  if (eocd < 0) throw new Error('это не zip-архив');
+
+  const total = readU16(view, eocd + 10);
+  let offset = readU32(view, eocd + 16);
+  const entries = [];
+  let totalBytes = 0;
+
+  for (let i = 0; i < total && i < maxEntries; i += 1) {
+    if (readU32(view, offset) !== 0x02014b50) break;
+    const method = readU16(view, offset + 10);
+    const compressedSize = readU32(view, offset + 20);
+    const uncompressedSize = readU32(view, offset + 24);
+    const nameLen = readU16(view, offset + 28);
+    const extraLen = readU16(view, offset + 30);
+    const commentLen = readU16(view, offset + 32);
+    const localOffset = readU32(view, offset + 42);
+    const name = new TextDecoder().decode(bytes.subarray(offset + 46, offset + 46 + nameLen));
+    offset += 46 + nameLen + extraLen + commentLen;
+
+    if (name.endsWith('/')) continue;
+    if (uncompressedSize > maxBytes) continue;
+    totalBytes += uncompressedSize;
+    if (totalBytes > maxBytes) break;
+
+    const localNameLen = readU16(view, localOffset + 26);
+    const localExtraLen = readU16(view, localOffset + 28);
+    const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+    const raw = bytes.subarray(dataStart, dataStart + compressedSize);
+
+    let data;
+    if (method === 0) data = raw.slice();
+    else if (method === 8) data = await inflateRaw(raw);
+    else continue; // другие методы (bzip2, zstd) не поддерживаем
+
+    entries.push({ name, bytes: data });
+  }
+
+  return entries;
+}
+
+/* ---------- zip: запись (без сжатия) ---------- */
+
+let CRC_TABLE = null;
+function crc32(bytes) {
+  if (!CRC_TABLE) {
+    CRC_TABLE = new Uint32Array(256);
+    for (let n = 0; n < 256; n += 1) {
+      let c = n;
+      for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      CRC_TABLE[n] = c >>> 0;
+    }
+  }
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i += 1) crc = CRC_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/** Собирает zip (store) из [{path, text | bytes}]. */
+function makeZip(files) {
+  const encoder = new TextEncoder();
+  const prepared = files.map((file) => {
+    const bytes = file.bytes ?? encoder.encode(file.text ?? '');
+    const name = encoder.encode(file.path);
+    return { name, bytes, crc: crc32(bytes) };
+  });
+
+  let size = 0;
+  for (const file of prepared) size += 30 + file.name.length + file.bytes.length + 46 + file.name.length;
+
+  const out = new Uint8Array(size + 22);
+  const view = new DataView(out.buffer);
+  let offset = 0;
+  const central = [];
+
+  for (const file of prepared) {
+    const localOffset = offset;
+    view.setUint32(offset, 0x04034b50, true);
+    view.setUint16(offset + 4, 20, true);
+    view.setUint16(offset + 6, 0x0800, true);
+    view.setUint16(offset + 8, 0, true);
+    view.setUint16(offset + 10, 0, true);
+    view.setUint16(offset + 12, 0, true);
+    view.setUint32(offset + 14, file.crc, true);
+    view.setUint32(offset + 18, file.bytes.length, true);
+    view.setUint32(offset + 22, file.bytes.length, true);
+    view.setUint16(offset + 26, file.name.length, true);
+    view.setUint16(offset + 28, 0, true);
+    out.set(file.name, offset + 30);
+    out.set(file.bytes, offset + 30 + file.name.length);
+    offset += 30 + file.name.length + file.bytes.length;
+    central.push({ localOffset, ...file });
+  }
+
+  const centralStart = offset;
+  for (const file of central) {
+    view.setUint32(offset, 0x02014b50, true);
+    view.setUint16(offset + 4, 20, true);
+    view.setUint16(offset + 6, 20, true);
+    view.setUint16(offset + 8, 0x0800, true);
+    view.setUint16(offset + 10, 0, true);
+    view.setUint16(offset + 12, 0, true);
+    view.setUint16(offset + 14, 0, true);
+    view.setUint32(offset + 16, file.crc, true);
+    view.setUint32(offset + 20, file.bytes.length, true);
+    view.setUint32(offset + 24, file.bytes.length, true);
+    view.setUint16(offset + 28, file.name.length, true);
+    view.setUint16(offset + 30, 0, true);
+    view.setUint16(offset + 32, 0, true);
+    view.setUint16(offset + 34, 0, true);
+    view.setUint16(offset + 36, 0, true);
+    view.setUint32(offset + 38, 0, true);
+    view.setUint32(offset + 42, file.localOffset, true);
+    out.set(file.name, offset + 46);
+    offset += 46 + file.name.length;
+  }
+
+  view.setUint32(offset, 0x06054b50, true);
+  view.setUint16(offset + 4, 0, true);
+  view.setUint16(offset + 6, 0, true);
+  view.setUint16(offset + 8, central.length, true);
+  view.setUint16(offset + 10, central.length, true);
+  view.setUint32(offset + 12, offset - centralStart, true);
+  view.setUint32(offset + 16, centralStart, true);
+  view.setUint16(offset + 20, 0, true);
+  return out;
+}
+
+/* ---------- base64 ---------- */
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+/* ---------- раскладка входящих файлов ---------- */
+
+/**
+ * Превращает один входной файл в набор файлов репозитория.
+ * @param {{name:string, bytes:Uint8Array}} input
+ */
+async function planFile(input, options) {
+  const { dest, destScripts, extractScripts, keepPlace, cleanNames } = options;
+  const safeName = sanitizeSegment(input.name, cleanNames);
+  const lower = input.name.toLowerCase();
+  const result = { repoFiles: [], notes: [] };
+
+  const placeDest = `${dest.replace(/\/+$/, '')}/${safeName}`;
+  const baseName = input.name.replace(/\.[^.]+$/, '');
+
+  if (lower.endsWith('.rbxlx') || lower.endsWith('.rbxmx')) {
+    const xml = new TextDecoder().decode(input.bytes);
+    if (keepPlace) result.repoFiles.push({ path: placeDest, bytes: input.bytes });
+    if (extractScripts) {
+      const extracted = rbxlxToFiles(xml, { baseName, destScripts, cleanNames });
+      result.repoFiles.push(...extracted.files);
+      result.notes.push(`скриптов: ${extracted.scriptCount}`);
+    }
+    return result;
+  }
+
+  if (lower.endsWith('.rbxl') || lower.endsWith('.rbxm')) {
+    if (keepPlace) result.repoFiles.push({ path: placeDest, bytes: input.bytes });
+    result.notes.push('бинарный формат: файл сохранён, скрипты не извлечены');
+    return result;
+  }
+
+  if (lower.endsWith('.zip')) {
+    if (keepPlace) result.repoFiles.push({ path: placeDest, bytes: input.bytes });
+    if (extractScripts) {
+      try {
+        const entries = await unzip(input.bytes);
+        for (const entry of entries) {
+          const entryLower = entry.name.toLowerCase();
+          if (entryLower.endsWith('.rbxlx') || entryLower.endsWith('.rbxmx')) {
+            const entryBase = entry.name.split('/').pop().replace(/\.[^.]+$/, '');
+            const xml = new TextDecoder().decode(entry.bytes);
+            const extracted = rbxlxToFiles(xml, { baseName: entryBase, destScripts, cleanNames });
+            result.repoFiles.push(...extracted.files);
+            result.notes.push(`${entry.name}: скриптов ${extracted.scriptCount}`);
+          } else if (TEXT_EXT.test(entry.name) || IMAGE_EXT.test(entry.name) || AUDIO_EXT.test(entry.name)) {
+            result.repoFiles.push({ path: `${dest}/${safeName}/unzipped/${entry.name.replace(/^\/+/, '')}`, bytes: entry.bytes });
+          }
+        }
+      } catch (error) {
+        result.notes.push('zip не распакован: ' + error.message);
+      }
+    }
+    return result;
+  }
+
+  if (/\.(lua|luau)$/i.test(input.name)) {
+    // Одиночный скрипт — сразу в папку скриптов, сохраняя структуру из имени файла, если она есть.
+    const relative = input.webkitRelativePath || input.name;
+    result.repoFiles.push({ path: `${destScripts.replace(/\/+$/, '')}/${safeName}`, bytes: input.bytes });
+    if (relative !== input.name) result.notes.push('из папки: ' + relative);
+    return result;
+  }
+
+  result.repoFiles.push({ path: `${dest}/${safeName}`, bytes: input.bytes });
+  return result;
+}
+
+/* ---------- GitHub ---------- */
+
+function ghHeaders(token) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+}
+
+async function ghRequest(fetchImpl, url, token, init = {}) {
+  const response = await fetchImpl(url, { ...init, headers: { ...ghHeaders(token), ...(init.headers ?? {}) } });
+  const text = await response.text();
+  let body = null;
+  try { body = text ? JSON.parse(text) : null; } catch { body = { raw: text }; }
+  return { ok: response.ok, status: response.status, body };
+}
+
+async function ghFileSha(fetchImpl, { owner, repo, branch, token, path }) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURI(path)}?ref=${encodeURIComponent(branch)}`;
+  const result = await ghRequest(fetchImpl, url, token);
+  if (result.ok && result.body && result.body.sha) return result.body.sha;
+  return null;
+}
+
+async function ghPutFile(fetchImpl, { owner, repo, branch, token, path, bytes, message }) {
+  const sha = await ghFileSha(fetchImpl, { owner, repo, branch, token, path });
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURI(path)}`;
+  const result = await ghRequest(fetchImpl, url, token, {
+    method: 'PUT',
+    body: JSON.stringify({
+      message,
+      content: bytesToBase64(bytes),
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+  if (!result.ok) {
+    throw new Error(`GitHub ${result.status}: ${result.body?.message ?? 'ошибка загрузки'}`);
+  }
+  return result.body;
+}
+/* === CORE END === */
+
+/* ---------------- интерфейс страницы ---------------- */
+
+const $ = (id) => document.getElementById(id);
+const els = {
+  drop: $('drop'), picker: $('picker'), dest: $('dest'), destScripts: $('destScripts'),
+  extractScripts: $('extractScripts'), keepPlace: $('keepPlace'), cleanNames: $('cleanNames'),
+  files: $('files'), log: $('log'), clear: $('clear'), download: $('download'),
+  owner: $('owner'), repo: $('repo'), branch: $('branch'), message: $('message'),
+  token: $('token'), remember: $('remember'), verify: $('verify'), upload: $('upload'),
+};
+
+let queue = [];          // {file, status, note, repoFiles}
+let planned = [];        // итоговые файлы {path, bytes|text}
+
+function log(line) {
+  els.log.hidden = false;
+  els.log.textContent += line + '\n';
+  els.log.scrollTop = els.log.scrollHeight;
+}
+
+function humanSize(bytes) {
+  if (bytes < 1024) return `${bytes} Б`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} МБ`;
+}
+
+function refreshFileList() {
+  els.files.innerHTML = '';
+  for (const entry of queue) {
+    const row = document.createElement('div');
+    row.className = 'file';
+    const path = document.createElement('div');
+    path.className = 'path';
+    path.textContent = entry.file.name;
+    const tag = document.createElement('span');
+    tag.className = `tag ${entry.status === 'ok' ? 'ok' : entry.status === 'err' ? 'err' : entry.status === 'skip' ? 'skip' : 'wait'}`;
+    tag.textContent = entry.status === 'ok' ? 'готово' : entry.status === 'err' ? 'ошибка' : entry.status === 'skip' ? 'пропуск' : 'в очереди';
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = [humanSize(entry.file.size), entry.note].filter(Boolean).join(' · ');
+    row.append(path, tag, meta);
+    els.files.append(row);
+  }
+  const hasFiles = queue.length > 0;
+  els.clear.disabled = !hasFiles;
+  els.download.disabled = !hasFiles;
+  els.upload.disabled = !hasFiles || !els.token.value.trim();
+}
+
+function readFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(new Uint8Array(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error('не прочитан файл'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function planAll() {
+  const options = {
+    dest: els.dest.value.trim() || 'game',
+    destScripts: els.destScripts.value.trim() || 'game/scripts',
+    extractScripts: els.extractScripts.checked,
+    keepPlace: els.keepPlace.checked,
+    cleanNames: els.cleanNames.checked,
+  };
+  planned = [];
+  for (const entry of queue) {
+    if (entry.status === 'ok') continue;
+    try {
+      const bytes = await readFile(entry.file);
+      const plan = await planFile({ name: entry.file.name, bytes }, options);
+      entry.repoFiles = plan.repoFiles;
+      entry.note = plan.notes.join(' · ');
+      entry.status = plan.repoFiles.length ? 'ok' : 'skip';
+      planned.push(...plan.repoFiles);
+      log(`+ ${entry.file.name} → файлов: ${plan.repoFiles.length}${entry.note ? ' (' + entry.note + ')' : ''}`);
+    } catch (error) {
+      entry.status = 'err';
+      entry.note = error.message;
+      log(`! ${entry.file.name}: ${error.message}`);
+    }
+    refreshFileList();
+  }
+  els.upload.disabled = !planned.length || !els.token.value.trim();
+}
+
+async function addFiles(fileList) {
+  for (const file of fileList) {
+    queue.push({ file, status: 'wait' });
+  }
+  refreshFileList();
+  await planAll();
+}
+
+els.drop.addEventListener('click', () => els.picker.click());
+els.picker.addEventListener('change', (event) => {
+  addFiles(event.target.files);
+  els.picker.value = '';
+});
+els.drop.addEventListener('dragover', (event) => {
+  event.preventDefault();
+  els.drop.classList.add('over');
+});
+els.drop.addEventListener('dragleave', () => els.drop.classList.remove('over'));
+els.drop.addEventListener('drop', async (event) => {
+  event.preventDefault();
+  els.drop.classList.remove('over');
+  const files = [];
+  const items = [...(event.dataTransfer.items ?? [])];
+  const walkEntry = async (entry) => {
+    if (entry.isFile) {
+      const file = await new Promise((resolve) => entry.file(resolve));
+      files.push(file);
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const children = await new Promise((resolve) => reader.readEntries(resolve));
+      for (const child of children) await walkEntry(child);
+    }
+  };
+  if (items.length && items[0].webkitGetAsEntry) {
+    for (const item of items) {
+      const entry = item.webkitGetAsEntry();
+      if (entry) await walkEntry(entry);
+    }
+  } else {
+    files.push(...event.dataTransfer.files);
+  }
+  await addFiles(files);
+});
+
+els.clear.addEventListener('click', () => {
+  queue = [];
+  planned = [];
+  els.files.innerHTML = '';
+  els.log.textContent = '';
+  els.log.hidden = true;
+  refreshFileList();
+});
+
+els.download.addEventListener('click', () => {
+  if (!planned.length) return;
+  const zip = makeZip(planned.map((file) => ({ path: file.path, bytes: file.bytes, text: file.text })));
+  const blob = new Blob([zip], { type: 'application/zip' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'game-upload.zip';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  log(`↧ скачан zip: ${planned.length} файлов, ${humanSize(zip.length)}`);
+});
+
+els.token.addEventListener('input', () => {
+  els.upload.disabled = !planned.length || !els.token.value.trim();
+});
+
+// настройки из localStorage
+const saved = JSON.parse(localStorage.getItem('vn-uploader') ?? '{}');
+for (const key of ['owner', 'repo', 'branch', 'dest', 'destScripts']) {
+  if (saved[key]) els[key].value = saved[key];
+}
+if (saved.token && saved.remember) {
+  els.token.value = saved.token;
+  els.remember.checked = true;
+}
+function persist() {
+  const data = {
+    owner: els.owner.value, repo: els.repo.value, branch: els.branch.value,
+    dest: els.dest.value, destScripts: els.destScripts.value,
+    remember: els.remember.checked,
+    token: els.remember.checked ? els.token.value : '',
+  };
+  localStorage.setItem('vn-uploader', JSON.stringify(data));
+}
+for (const el of [els.owner, els.repo, els.branch, els.dest, els.destScripts, els.token, els.remember]) {
+  el.addEventListener('change', persist);
+}
+
+function githubConfig() {
+  return {
+    owner: els.owner.value.trim(),
+    repo: els.repo.value.trim(),
+    branch: els.branch.value.trim() || 'main',
+    token: els.token.value.trim(),
+  };
+}
+
+els.verify.addEventListener('click', async () => {
+  const cfg = githubConfig();
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    log('! заполни owner, repo и токен');
+    return;
+  }
+  log(`… проверяю доступ к ${cfg.owner}/${cfg.repo}`);
+  const result = await ghRequest(fetch, `https://api.github.com/repos/${cfg.owner}/${cfg.repo}`, cfg.token);
+  if (result.ok) {
+    log(`✓ доступ есть. ветка по умолчанию: ${result.body.default_branch}`);
+    if (!els.branch.value) els.branch.value = result.body.default_branch;
+  } else {
+    log(`! GitHub ${result.status}: ${result.body?.message ?? 'нет доступа'}`);
+  }
+});
+
+els.upload.addEventListener('click', async () => {
+  const cfg = githubConfig();
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    log('! заполни owner, repo и токен');
+    return;
+  }
+  if (!planned.length) {
+    log('! нет файлов для загрузки');
+    return;
+  }
+  els.upload.disabled = true;
+  els.upload.textContent = 'Загружаю…';
+  let ok = 0;
+  let failed = 0;
+  try {
+    for (const file of planned) {
+      const bytes = file.bytes ?? new TextEncoder().encode(file.text ?? '');
+      const path = file.path.replace(/^\/+/, '');
+      try {
+        await ghPutFile(fetch, { ...cfg, path, bytes, message: els.message.value || 'upload' });
+        ok += 1;
+        log(`✓ ${path} (${humanSize(bytes.length)})`);
+      } catch (error) {
+        failed += 1;
+        log(`! ${path}: ${error.message}`);
+      }
+    }
+  } finally {
+    els.upload.disabled = false;
+    els.upload.textContent = 'Закоммитить в GitHub';
+    log(`\nИтог: ${ok} файлов загружено, ${failed} с ошибкой.`);
+  }
+});
+
+refreshFileList();
+</script>
+</body>
+</html>

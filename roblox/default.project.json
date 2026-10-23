@@ -1,0 +1,24 @@
+{
+  "name": "TishinaVN",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Shared": {
+        "$className": "Folder",
+        "$path": "src/ReplicatedStorage/Shared"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      }
+    }
+  }
+}

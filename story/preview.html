@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Станция «Тишина» — просмотр сюжета</title>
+<style>
+  :root {
+    --bg: #090b12; --panel: #121622; --panel2: #181d2c; --line: #2a3247;
+    --text: #e6ebf5; --muted: #8a93aa; --accent: #7dd3fc; --good: #a3e635;
+    --warn: #fbbf24; --bad: #f87171;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background:
+      radial-gradient(900px 520px at 50% -10%, #17223a 0%, var(--bg) 62%);
+    color: var(--text); font: 16px/1.6 ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    padding: 24px 16px 56px;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; display: grid; gap: 16px; }
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .top h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.2px; }
+  .top .meta { color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+  @media (max-width: 880px) { main { grid-template-columns: 1fr; } aside { order: 2; } }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 28px;
+    box-shadow: 0 20px 60px #0006;
+  }
+  .act { color: var(--accent); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .scene { font-size: 24px; font-weight: 700; margin: 6px 0 2px; }
+  .speaker { font-size: 15px; font-weight: 650; margin-bottom: 14px; }
+  .text { font-size: 18px; line-height: 1.55; min-height: 140px; white-space: pre-wrap; }
+  .cursor { display: inline-block; width: 8px; height: 18px; background: var(--accent); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  hr { border: 0; border-top: 1px solid #2a3247; margin: 20px 0 16px; }
+  .choices { display: grid; gap: 9px; }
+  button.choice {
+    text-align: left; padding: 13px 16px; border-radius: 11px; cursor: pointer;
+    background: #202838; border: 1px solid #2f3b55; color: var(--text); font: inherit; font-size: 15px;
+    transition: background .15s, border-color .15s, transform .06s;
+  }
+  button.choice:hover:not(:disabled) { background: #2a3550; border-color: #46608c; }
+  button.choice:active:not(:disabled) { transform: translateY(1px); }
+  button.choice:disabled { color: #6f7891; background: #1a1f2c; cursor: not-allowed; }
+  button.choice .why { display: block; font-size: 12px; color: #6f7891; margin-top: 3px; }
+  aside .panel { padding: 18px; }
+  aside h2 { margin: 0 0 10px; font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+  .tag {
+    display: inline-block; padding: 3px 9px; border-radius: 999px; background: #1e293b;
+    font-size: 12px; margin: 0 5px 5px 0; color: #c2cbdd;
+  }
+  .tag.item { background: #26301a; color: #d3f09a; }
+  .bar { height: 6px; border-radius: 999px; background: #1c2436; overflow: hidden; margin: 10px 0 12px; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .4s; }
+  .muted { color: var(--muted); font-size: 12.5px; }
+  .ending { display: none; }
+  .ending.show { display: block; animation: fade .5s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+  .kind { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
+  .ending h2 { font-size: 42px; margin: 8px 0 4px; letter-spacing: -.5px; }
+  .ending .summary { color: var(--muted); margin-bottom: 18px; }
+  .ending .body { font-size: 17px; line-height: 1.6; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+  button.plain {
+    padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2);
+    color: var(--text); font: inherit; font-size: 14px; cursor: pointer;
+  }
+  button.plain:hover { border-color: #4a5b7d; }
+  a { color: var(--accent); }
+  .notice { background: #1d1a0f; border-left: 3px solid #6b5316; color: #e7d9a8; padding: 12px 14px; border-radius: 8px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1 id="title">Станция «Тишина»</h1>
+    <div class="meta">просмотр сюжета · <a href="../uploader/index.html">загрузить игру</a> · <a href="../docs/СЮЖЕТ.md">библия сюжета</a></div>
+  </div>
+
+  <div id="notice" class="notice" hidden>
+    Не удалось прочитать <code>story/story.json</code>. Открой страницу через локальный сервер:
+    <code>npm run serve</code> → <code>http://localhost:8080/story/preview.html</code>.
+  </div>
+
+  <main id="main" hidden>
+    <section class="panel">
+      <div id="scene" class="scroll">
+        <div class="act" id="act">Акт I</div>
+        <div class="scene" id="sceneName"></div>
+        <div class="speaker" id="speaker"></div>
+        <div class="text" id="text"></div>
+        <hr />
+        <div class="choices" id="choices"></div>
+      </div>
+
+      <div class="ending" id="ending">
+        <div class="kind" id="endKind"></div>
+        <h2 id="endTitle"></h2>
+        <div class="summary" id="endSummary"></div>
+        <div class="body" id="endText"></div>
+        <div class="row">
+          <button class="plain" id="again">Пройти заново</button>
+          <button class="plain" id="toStart">В начало</button>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2>Журнал</h2>
+        <div id="items" class="muted">пока пусто</div>
+        <div class="bar"><div id="barFill"></div></div>
+        <div class="muted" id="progressText"></div>
+        <div class="row">
+          <button class="plain" id="restart">Заново</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script type="module">
+import { StoryPlayer } from './player.js';
+
+const $ = (id) => document.getElementById(id);
+const ACTS = ['Акт I', 'Акт II', 'Акт III'];
+
+let story;
+let player;
+let typing = null;
+
+try {
+  story = await (await fetch('./story.json')).json();
+} catch {
+  $('notice').hidden = false;
+}
+
+if (story) {
+  $('main').hidden = false;
+  document.title = story.meta.title + ' — просмотр сюжета';
+  $('title').textContent = story.meta.title;
+  start();
+}
+
+function start() {
+  player = new StoryPlayer(story);
+  player.enter(player.state.nodeId);
+  render(player.current());
+}
+
+function stopTyping() {
+  if (typing) {
+    clearInterval(typing);
+    typing = null;
+  }
+}
+
+function typeText(element, text, done) {
+  stopTyping();
+  element.textContent = '';
+  let i = 0;
+  typing = setInterval(() => {
+    i += 2;
+    element.textContent = text.slice(0, i);
+    if (i >= text.length) {
+      stopTyping();
+      element.textContent = text;
+      done?.();
+    }
+  }, 12);
+  element.onclick = () => {
+    stopTyping();
+    element.textContent = text;
+    done?.();
+  };
+}
+
+function render(view) {
+  $('ending').classList.remove('show');
+  $('scene').style.display = '';
+
+  $('act').textContent = ACTS[view.act - 1] ?? `Акт ${view.act}`;
+  $('sceneName').textContent = view.scene;
+  $('speaker').textContent = view.speaker;
+  $('speaker').style.color = view.color;
+
+  const choicesBox = $('choices');
+  choicesBox.innerHTML = '';
+
+  typeText($('text'), view.text, () => {
+    for (const choice of view.choices) {
+      const button = document.createElement('button');
+      button.className = 'choice';
+      button.disabled = !choice.available;
+      button.textContent = choice.text;
+      if (!choice.available && choice.reason) {
+        const why = document.createElement('span');
+        why.className = 'why';
+        why.textContent = choice.reason;
+        button.append(why);
+      }
+      button.onclick = () => {
+        const [ok, result] = player.choose(choice.index);
+        if (ok) render(result);
+        else button.disabled = true;
+      };
+      choicesBox.append(button);
+    }
+  });
+
+  renderJournal();
+
+  if (view.isEnding) {
+    showEnding(view.ending);
+  }
+}
+
+function renderJournal() {
+  const items = Object.entries(player.state.items).filter(([, owned]) => owned);
+  const flags = Object.entries(player.state.flags).filter(([, value]) => value);
+
+  const box = $('items');
+  box.innerHTML = '';
+  if (!items.length && !flags.length) {
+    box.textContent = 'пока пусто';
+  }
+  for (const [id] of items) {
+    const tag = document.createElement('span');
+    tag.className = 'tag item';
+    tag.textContent = '◆ ' + (story.items?.[id]?.name ?? id);
+    box.append(tag);
+  }
+  for (const [id] of flags) {
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = story.flags?.[id]?.label ?? id;
+    box.append(tag);
+  }
+
+  const progress = player.progress();
+  $('barFill').style.width = `${Math.round((progress.visited / progress.total) * 100)}%`;
+  $('progressText').textContent = `Сцен пройдено: ${progress.visited} из ${progress.total}`;
+}
+
+function showEnding(ending) {
+  const kinds = { neutral: ['Нейтральная концовка', 'var(--accent)'], bad: ['Плохая концовка', 'var(--bad)'], true: ['Истинная концовка', 'var(--warn)'] };
+  const [label, color] = kinds[ending.type] ?? ['Концовка', 'var(--accent)'];
+  $('endKind').textContent = label;
+  $('endKind').style.color = color;
+  $('endTitle').textContent = ending.title;
+  $('endSummary').textContent = ending.summary ?? '';
+  $('endText').textContent = ending.text ?? '';
+  $('ending').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+$('again').onclick = start;
+$('restart').onclick = start;
+$('toStart').onclick = start;
+</script>
+</body>
+</html>
