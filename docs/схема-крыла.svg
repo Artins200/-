@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="720" viewBox="0 0 1400 720" font-family="ui-sans-serif, system-ui, sans-serif">
+<rect width="1400" height="720" fill="#0b0e16"/>
+<text x="70" y="52" fill="#e8ecf6" font-size="27" font-weight="600">Крыло сюжета: 95 комнат из моделей neirogh.rbxl</text>
+<text x="70" y="78" fill="#8b93a7" font-size="14">каждая сцена — копия модели Room · персонаж сцены — копия модели с карты · между комнатами портал «Teleport One Way» · никакого интерфейса</text>
+<rect x="70.0" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>1. start — Шаттл «Кайрос». 06:12 · Артём</title></rect>
+<rect x="83.3" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>2. hull — Внешняя обшивка · Артём</title></rect>
+<rect x="96.5" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>3. airlock — Шлюз №3 · Артём</title></rect>
+<rect x="109.8" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>4. hello — Шлюз №3 · МАМА</title></rect>
+<rect x="123.1" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>5. hub — Центральный узел · Артём</title></rect>
+<rect x="136.3" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>6. quarters — Жилой блок · Артём</title></rect>
+<rect x="149.6" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>7. diary — Жилой блок. Аудиодневник · Лира</title></rect>
+<rect x="162.8" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>8. locker — Жилой блок. Шкафчик 9 · Артём</title></rect>
+<rect x="176.1" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>9. tunnel — Техтоннель · Артём</title></rect>
+<rect x="189.4" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>10. lira — Техтоннель. Отсек Лиры · Лира</title></rect>
+<rect x="202.6" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>11. lira_truth — Техтоннель. Отсек Лиры · Лира</title></rect>
+<rect x="215.9" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>12. first — Техтоннель. Отсек Лиры · Лира</title></rect>
+<rect x="229.2" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>13. plan — Техтоннель. Отсек Лиры · Лира</title></rect>
+<rect x="242.4" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>14. shaft — Шахта купола · Артём</title></rect>
+<rect x="255.7" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>15. twin_voice — Шахта купола. Дно · Артинс</title></rect>
+<rect x="268.9" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>16. twin_voice2 — Шахта купола. Дно · Артинс</title></rect>
+<rect x="282.2" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>17. bridge — Рубка · Кай Вэрн</title></rect>
+<rect x="295.5" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>18. kai_truth — Рубка. Разговор с Каем · Кай Вэрн</title></rect>
+<rect x="308.7" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>19. kai_truth2 — Рубка. Разговор с Каем · Кай Вэрн</title></rect>
+<rect x="322.0" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>20. relay — Сигнальное реле · Артём</title></rect>
+<rect x="335.3" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>21. notebook — Сигнальное реле. Тетрадь · Артём</title></rect>
+<rect x="348.5" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>22. notebook2 — Сигнальное реле. Тетрадь · Артём</title></rect>
+<rect x="361.8" y="177.0" width="11.8" height="26" rx="2" fill="#7dd3fc" fill-opacity="0.85"><title>23. relay_off — Сигнальное реле. Обесточивание · Артём</title></rect>
+<rect x="375.1" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>24. dome — Купол. Вход · Артём</title></rect>
+<rect x="388.3" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>25. sky_crack — Двор. Трещина · Артём</title></rect>
+<rect x="401.6" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>26. schoolyard — Школьный двор. 1 сентября · Артём</title></rect>
+<rect x="414.8" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>27. signs — Коридор первого этажа · Артём</title></rect>
+<rect x="428.1" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>28. gang — Школьный двор. Компания · Демид</title></rect>
+<rect x="441.4" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>29. plan_ignore — Школьный двор · Демид</title></rect>
+<rect x="454.6" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>30. plan_talk — Школьный двор · Демид</title></rect>
+<rect x="467.9" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>31. demid_talk — Школьный двор. Скамейка · Демид</title></rect>
+<rect x="481.2" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>32. demid_talk2 — Школьный двор. Скамейка · Демид</title></rect>
+<rect x="494.4" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>33. vanya_meet — Коридор. Встреча с Ваней · Ваня</title></rect>
+<rect x="507.7" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>34. vanya_talk — Коридор. Разговор с Ваней · Ваня</title></rect>
+<rect x="520.9" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>35. vanya_memory — Коридор. Память Вани · Артём</title></rect>
+<rect x="534.2" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>36. vanya_fight — Двор. Драка · Артём</title></rect>
+<rect x="547.5" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>37. fight_block — Двор. Драка · Артём</title></rect>
+<rect x="560.7" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>38. fight_hit — Двор. Драка · Артём</title></rect>
+<rect x="574.0" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>39. fight_truth — Двор. Клинч · Артём</title></rect>
+<rect x="587.3" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>40. perfect_form — Спортзал. Перфект-форма · Артинс</title></rect>
+<rect x="600.5" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>41. artins_talk — Спортзал. Разговор с копией · Артинс</title></rect>
+<rect x="613.8" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>42. artins_anger — Спортзал. Ссора · Артинс</title></rect>
+<rect x="627.1" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>43. artins_death — Спортзал. Правда Артинса · Артинс</title></rect>
+<rect x="640.3" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>44. artins_clash — Спортзал. Первая схватка · Артём</title></rect>
+<rect x="653.6" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>45. artins_grip — Спортзал. Захват · Артинс</title></rect>
+<rect x="666.8" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>46. mama_stop — Спортзал. Вмешательство · МАМА</title></rect>
+<rect x="680.1" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>47. mama_answer — Спортзал. Ответ МАМЫ · МАМА</title></rect>
+<rect x="693.4" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>48. demid_choice — Спортзал. Демид · Демид</title></rect>
+<rect x="706.6" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>49. chapter_end_2 — Спортзал. Конец первого круга · Артём</title></rect>
+<rect x="719.9" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>50. last_page — Спортзал. Последняя страница · Артём</title></rect>
+<rect x="733.2" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>51. break_loop — Купол. Разрыв круга · Артём</title></rect>
+<rect x="746.4" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>52. lira_call — Купол. Голос снаружи · Лира</title></rect>
+<rect x="759.7" y="174.0" width="11.8" height="32" rx="2" fill="#a3e635" fill-opacity="0.85"><title>53. act2_final — Спортзал. Люк в полу · Артём</title></rect>
+<rect x="772.9" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>54. act3_start — Огненный зал. Ступени · Артинс</title></rect>
+<rect x="786.2" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>55. artins_explain — Огненный зал. Объяснение · Артинс</title></rect>
+<rect x="799.5" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>56. artins_terms — Огненный зал. Условия · Артинс</title></rect>
+<rect x="812.7" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>57. mama_terms — Огненный зал. МАМА · МАМА</title></rect>
+<rect x="826.0" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>58. mama_three — Огненный зал. Три силы · Артём</title></rect>
+<rect x="839.3" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>59. nekit_talk — Огненный зал. Наёмники · Некит</title></rect>
+<rect x="852.5" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>60. nekit_deal — Огненный зал. Сделка · Богдан</title></rect>
+<rect x="865.8" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>61. nekit_threat — Огненный зал. Угроза · Некит</title></rect>
+<rect x="879.1" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>62. allies — Огненный зал. Сбор · Артём</title></rect>
+<rect x="892.3" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>63. battle_plan — Огненный зал. План · Лира</title></rect>
+<rect x="905.6" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>64. lira_teleport — Огненный зал. Телепорт · Лира</title></rect>
+<rect x="918.8" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>65. war_council — Огненный зал. Военный совет · Артинс</title></rect>
+<rect x="932.1" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>66. artins_hand — Огненный зал. Рукопожатие · Артём</title></rect>
+<rect x="945.4" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>67. act3_final — Огненный зал. Последняя ночь · Артём</title></rect>
+<rect x="958.6" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>68. lira_last — Огненный зал. Лира · Лира</title></rect>
+<rect x="971.9" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>69. kai_last — Огненный зал. Кай · Кай Вэрн</title></rect>
+<rect x="985.2" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>70. artins_last — Огненный зал. Артинс · Артинс</title></rect>
+<rect x="998.4" y="171.0" width="11.8" height="38" rx="2" fill="#fbbf24" fill-opacity="0.85"><title>71. dawn — Огненный зал. Рассвет · Артём</title></rect>
+<rect x="1011.7" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>72. ch4_teleport — Арена. Телепорт последнего шанса · Лира</title></rect>
+<rect x="1024.9" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>73. teleport_refuse — Арена. Телепорт последнего шанса · Лира</title></rect>
+<rect x="1038.2" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>74. arena_arrival — Зал огня. Центр арены · Артём</title></rect>
+<rect x="1051.5" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>75. act4_start — Огненный зал. Последний час · МАМА</title></rect>
+<rect x="1064.7" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>76. nekit_first — Арена. Некит · Некит</title></rect>
+<rect x="1078.0" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>77. nekit_fight — Арена. Некит · Артём</title></rect>
+<rect x="1091.3" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>78. nekit_shadows — Арена. Тени · Артём</title></rect>
+<rect x="1104.5" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>79. nekit_memory — Арена. Память Некита · Некит</title></rect>
+<rect x="1117.8" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>80. vanya_joins — Арена. Ваня · Ваня</title></rect>
+<rect x="1131.1" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>81. demid_joins — Арена. Демид · Демид</title></rect>
+<rect x="1144.3" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>82. bogdan_turn — Арена. Богдан и Ярик · Богдан</title></rect>
+<rect x="1157.6" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>83. beast_contract — Арена. Контракт · Богдан</title></rect>
+<rect x="1170.8" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>84. karina_fire — Арена. Очаг Карины · Артём</title></rect>
+<rect x="1184.1" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>85. artins_jealousy — Арена. Ревность · Артинс</title></rect>
+<rect x="1197.4" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>86. artins_rage — Арена. Ярость · Артинс</title></rect>
+<rect x="1210.6" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>87. embrace — Арена. Объятие · Артём</title></rect>
+<rect x="1223.9" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>88. duel — Арена. Дуэль · Артём</title></rect>
+<rect x="1237.2" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>89. karina_call — Арена. Карина · Артём</title></rect>
+<rect x="1250.4" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>90. sacrifice_moment — Арена. Момент · Артём</title></rect>
+<rect x="1263.7" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>91. mama_ultimatum — Арена. Ультиматум МАМЫ · МАМА</title></rect>
+<rect x="1276.9" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>92. final_choice — Арена. Последний выбор · Артём</title></rect>
+<rect x="1290.2" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>93. ending_ash — Арена. Пепел · Артём</title></rect>
+<rect x="1303.5" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>94. ending_shard — Арена. Осколок · Артём</title></rect>
+<rect x="1316.7" y="168.0" width="11.8" height="44" rx="2" fill="#f97316" fill-opacity="0.85"><title>95. ending_loop — Арена. Сигнал · Артём</title></rect>
+<line x1="70.0" y1="110" x2="70.0" y2="230" stroke="#2b3446" stroke-dasharray="3 4"/>
+<text x="74.0" y="102" fill="#7dd3fc" font-size="13" font-weight="600">I. Тишина</text>
+<line x1="375.1" y1="110" x2="375.1" y2="230" stroke="#2b3446" stroke-dasharray="3 4"/>
+<text x="379.1" y="102" fill="#a3e635" font-size="13" font-weight="600">II. Первого сентября</text>
+<line x1="772.9" y1="110" x2="772.9" y2="230" stroke="#2b3446" stroke-dasharray="3 4"/>
+<text x="776.9" y="102" fill="#fbbf24" font-size="13" font-weight="600">III. Сплав</text>
+<line x1="1011.7" y1="110" x2="1011.7" y2="230" stroke="#2b3446" stroke-dasharray="3 4"/>
+<text x="1015.7" y="102" fill="#f97316" font-size="13" font-weight="600">IV. Жестокий сплав</text>
+<text x="70" y="246" fill="#5d6884" font-size="12">комната 1 · спавн игрока</text>
+<text x="1330" y="246" fill="#5d6884" font-size="12" text-anchor="end">комната 95 · финальная глава</text>
+<path d="M1336 190 l26 0" stroke="#f97316" stroke-width="3"/>
+<path d="M1362 182 l14 8 -14 8z" fill="#f97316"/>
+<text x="1334" y="168" fill="#f97316" font-size="12">портал в следующую локацию</text>
+<text x="70" y="306" fill="#e8ecf6" font-size="19" font-weight="600">Как устроена одна комната</text>
+<text x="70" y="330" fill="#8b93a7" font-size="13">вид сверху: kai_truth2 · Рубка. Разговор с Каем</text>
+<rect x="110.0" y="350.0" width="1180.0" height="250" rx="8" fill="#111726" stroke="#25304a"/>
+<circle cx="332.7" cy="450.0" r="9" fill="#7dd3fc" fill-opacity="0.9"/>
+<text x="332.7" y="433.0" fill="#7dd3fc" font-size="12" text-anchor="middle">вход · сюда выбрасывает портал</text>
+<circle cx="626.5" cy="NaN" r="11" fill="#a3e635" fill-opacity="0.9"/>
+<text x="626.5" y="NaN" fill="#a3e635" font-size="12" text-anchor="middle">персонаж: Кай Вэрн</text>
+<circle cx="895.9" cy="NaN" r="8" fill="#e2e8f0" fill-opacity="0.9"/>
+<text x="895.9" y="NaN" fill="#e2e8f0" font-size="12" text-anchor="middle">вывеска с текстом сцены</text>
+<circle cx="1091.8" cy="NaN" r="8" fill="#f97316" fill-opacity="0.9"/>
+<text x="1091.8" y="NaN" fill="#f97316" font-size="12" text-anchor="middle">выход · портал дальше</text>
+<line x1="332.7" y1="610.0" x2="1091.8" y2="610.0" stroke="#2b3446" stroke-width="2" marker-end="url(#arrow)"/>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2b3446"/></marker></defs>
+<text x="712.2" y="632.0" fill="#5d6884" font-size="12" text-anchor="middle">игрок идёт вперёд</text>
+<circle cx="70" cy="686" r="5" fill="#7dd3fc"/>
+<text x="82" y="690" fill="#8b93a7" font-size="13">I. Тишина</text>
+<circle cx="320" cy="686" r="5" fill="#a3e635"/>
+<text x="332" y="690" fill="#8b93a7" font-size="13">II. Первого сентября</text>
+<circle cx="570" cy="686" r="5" fill="#fbbf24"/>
+<text x="582" y="690" fill="#8b93a7" font-size="13">III. Сплав</text>
+<circle cx="820" cy="686" r="5" fill="#f97316"/>
+<text x="832" y="690" fill="#8b93a7" font-size="13">IV. Жестокий сплав</text>
+<text x="1330" y="690" fill="#5d6884" font-size="12" text-anchor="end">шаг между комнатами: 62.18727798759937 юнитов · ширина комнаты: 48.18727798759937</text>
+</svg>

@@ -9,3 +9,6 @@ package-lock.json
 # служебное
 .DS_Store
 Thumbs.db
+
+# промежуточная сборка крыла
+neirogh.world.rbxl

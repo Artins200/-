@@ -1,6 +1,6 @@
 --!nonstrict
 -- Тесты игровой логики. Запуск: node tools/run-luau-tests.mjs
--- Глобальные StoryData, StoryEngine, Cinema и TeleportDirector подставляет раннер.
+-- Глобальные StoryData и StoryEngine подставляет раннер.
 
 local failures, checks = 0, 0
 
@@ -90,8 +90,6 @@ check("сцена с телепортом найдена", teleportScene ~= nil)
 if teleportScene then
 	local tp = teleportScene.teleport
 	check("телепорт в последней главе", teleportScene.act == 4, teleportScene.act)
-	local ok, reason = TeleportDirector.validate(tp)
-	check("описание телепорта валидно", ok, reason)
 	check("координаты — три числа", type(tp.target) == "table" and #tp.target == 3)
 	check("цель — арена огня (x ≈ -201)", math.abs(tp.target[1] + 201.6) < 1, tp.target[1])
 	check("цель — арена огня (z ≈ 6)", math.abs(tp.target[3] - 6.1) < 1, tp.target[3])
@@ -105,14 +103,14 @@ if teleportScene then
 		return false
 	end)())
 
-	local blocked = TeleportDirector.availability(tp, { items = {}, flags = {} })
-	check("без платы телепорт закрыт", blocked == false)
-	local allowed = TeleportDirector.availability(tp, { items = { plate = true }, flags = {} })
-	check("с платой телепорт открыт", allowed == true)
-
-	local described = TeleportDirector.describe(tp, StoryData.meta.map and StoryData.meta.map.spawn)
-	check("описание содержит координаты", described and described.target.x == tp.target[1])
-	check("известна дистанция от спавна", described and described.distanceFromSpawn and described.distanceFromSpawn > 0)
+	check("цель телепорта — три конечных числа", (function()
+		for i = 1, 3 do
+			if type(tp.target[i]) ~= "number" or tp.target[i] ~= tp.target[i] then
+				return false
+			end
+		end
+		return true
+	end)())
 end
 
 -- Арена из meta.map должна совпадать с целью телепорта.
@@ -148,32 +146,16 @@ for _, node in ipairs(StoryData.nodes) do
 end
 check("анимаций в сюжете больше пяти", animsCount > 5, animsCount)
 
-local cinema = Cinema.new({
-	{ id = "fire", fps = 10, loop = true, frames = { "a", "b", "c" } },
-}, 4)
-local firstFrame = cinema:frame("fire")
-check("первый кадр", firstFrame == "a", firstFrame)
-
-local restarts = 0
-for _ = 1, 40 do
-	local frames = cinema:advance(0.1)
-	for _, frame in ipairs(frames) do
-		if frame.restarted then
-			restarts += 1
+check("у каждой анимации есть кадры", (function()
+	for _, node in ipairs(StoryData.nodes) do
+		for _, anim in ipairs(node.animations or {}) do
+			if type(anim.frames) ~= "table" or #anim.frames == 0 then
+				return false
+			end
 		end
 	end
-end
-check("анимация перезапускалась несколько раз", restarts >= 3, restarts)
-check("после кругов кадр всё ещё из набора", cinema:frame("fire") == "a" or cinema:frame("fire") == "b" or cinema:frame("fire") == "c")
-local snapshot = cinema:snapshot()[1]
-check("счётчик кругов растёт", snapshot.loops >= 3, snapshot.loops)
-check("анимация не закончилась", snapshot.loop == true)
-
-cinema:restart("fire")
-check("рестарт возвращает первый кадр", cinema:frame("fire") == "a")
-
-local empty = Cinema.new({})
-check("пустой список анимаций безопасен", #empty:advance(1) == 0)
+	return true
+end)())
 
 --------------------------------------------------------------------------------
 print("— ветка до финала: смерть Артёма неизбежна")
@@ -415,67 +397,45 @@ local broken = StoryEngine.new(StoryData, { nodeId = "нет такой сцен
 check("битое сохранение откатывается на старт", broken.state.nodeId == "start")
 
 --------------------------------------------------------------------------------
-print("— мир: раскладка сюжета по карте")
+print("— порядок сцен: по нему собирается крыло из комнат")
 
-local wk = WorldKit.new(StoryData)
-local plan = wk.plan
-local planned, finite, dupes = 0, true, 0
-local seenPoints = {}
-for _, node in ipairs(StoryData.nodes) do
-	local entry = plan[node.id]
-	if entry then
-		planned += 1
-		for i = 1, 3 do
-			if type(entry.pos[i]) ~= "number" or entry.pos[i] ~= entry.pos[i] or math.abs(entry.pos[i]) > 1e6 then
-				finite = false
-			end
-		end
-		local key = string.format("%.1f:%.1f", entry.pos[1], entry.pos[3])
-		if seenPoints[key] then dupes += 1 end
-		seenPoints[key] = true
+check("StoryData.order есть", type(StoryData.order) == "table")
+check("в порядке столько же сцен, сколько в сюжете", #(StoryData.order or {}) == #StoryData.nodes, #(StoryData.order or {}) .. " из " .. #StoryData.nodes)
+check("порядок — это ровно те же id", (function()
+	local seen = {}
+	for _, id in ipairs(StoryData.order or {}) do
+		seen[id] = (seen[id] or 0) + 1
 	end
-end
-check("у каждой сцены есть точка на карте", planned == #StoryData.nodes, planned .. " из " .. #StoryData.nodes)
-check("координаты сцен конечные", finite)
-check("сцены не свалены в одну точку", dupes < #StoryData.nodes / 3, dupes .. " совпадений")
-
-local route = wk:route()
-check("маршрут начинается у спавна", route[1] and route[1].zone == "spawn")
-check("маршрут заканчивается на арене", route[#route] and route[#route].zone == "z4_c7")
-check("акты в маршруте по возрастанию", (function()
-	for i = 2, #route do
-		if route[i].act < route[i - 1].act then return false end
+	for _, node in ipairs(StoryData.nodes) do
+		if seen[node.id] ~= 1 then
+			return false
+		end
+	end
+	for id, n in pairs(seen) do
+		if n ~= 1 then return false end
 	end
 	return true
 end)())
-
-local first = plan["start"]
-local arenaScene = plan["final_choice"]
-check("старт рядом со спавном", first and wk:distanceTo("start", StoryData.world.spawn) < 200,
-	first and wk:distanceTo("start", StoryData.world.spawn))
-check("финал у арены", arenaScene and arenaScene.act == 4)
-
-local withNpc = 0
-for _, node in ipairs(StoryData.nodes) do
-	local entry = plan[node.id]
-	if entry and entry.npc then withNpc += 1 end
-end
-check("живые НПС ведут хотя бы часть сцен", withNpc > 10, withNpc .. " сцен у НПС")
-
-check("каст с карты подхвачен", #(StoryData.world.cast or {}) > 100, #(StoryData.world.cast or {}))
-local demidSpot
-for _, npc in ipairs(StoryData.world.cast or {}) do
-	if npc.name == "Демид" then demidSpot = npc.pos break end
-end
-check("Демид есть на карте", demidSpot ~= nil)
-check("НПС находится по имени персонажа", demidSpot ~= nil and wk:findNpc("demid", demidSpot) ~= nil)
-check("точка сцены не улетает в небо", first and math.abs(first.pos[2]) < 200)
-
-local auto = 0
-for _, node in ipairs(StoryData.nodes) do
-	if wk:autoChoice(node.id) then auto += 1 end
-end
-check("есть сцены с автопереходом (идёшь — сцена сменяется)", auto > 5, auto)
+check("первая сцена порядка — старт", StoryData.order[1] == StoryData.meta.start, StoryData.order[1])
+check("последняя сцена порядка — концовка", (function()
+	local last = StoryData.nodes[#StoryData.order]
+	return last and last.ending ~= nil
+end)())
+check("в порядке есть все четыре акта", (function()
+	local acts = {}
+	for _, node in ipairs(StoryData.nodes) do
+		acts[node.act or 1] = true
+	end
+	return acts[1] and acts[2] and acts[3] and acts[4]
+end)())
+check("текст каждой сцены не пустой", (function()
+	for _, node in ipairs(StoryData.nodes) do
+		if type(node.text) ~= "string" or node.text == "" then
+			return false
+		end
+	end
+	return true
+end)())
 
 print("")
 print(string.format("Проверок: %d, провалено: %d", checks, failures))

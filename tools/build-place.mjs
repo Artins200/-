@@ -1,22 +1,26 @@
 #!/usr/bin/env node
-// Собирает ОДИН .rbxl: карта из neirogh.rbxl + скрипты новеллы из roblox/src.
+// Собирает ОДИН .rbxl: карта neirogh.rbxl + крыло сюжета + серверный скрипт.
 //
 //   node tools/build-place.mjs            → neirogh.story.rbxl
 //   node tools/build-place.mjs --out x.rbxl
 //
-// Скрипты кладутся туда же, куда их положил бы Rojo:
-//   ReplicatedStorage/Shared/{StoryData,StoryEngine,Cinema,TeleportDirector,WorldKit}
-//   ServerScriptService/StoryServer
-//   StarterPlayer/StarterPlayerScripts/StoryClient
+// Что внутри:
+//   Workspace.StoryWing      95 комнат (копии модели Room) с персонажами и вывесками,
+//                            между комнатами — порталы «Teleport One Way» из этого плейса;
+//   ReplicatedStorage/Shared StoryData, StoryEngine;
+//   ServerScriptService      StoryWorld — единственный скрипт, ни одного ScreenGui.
 //
-// Повторный запуск не плодит дубликаты: одноимённые узлы удаляются перед вставкой.
+// Повторный запуск не плодит дубликаты: старое крыло и скрипты удаляются.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { buildWing } from './world-builder.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SOURCE = path.join(ROOT, 'neirogh.rbxl');
+const STORY = path.join(ROOT, 'story/story.json');
+const OUT_JSON = path.join(ROOT, 'game/world.json');
 
 const args = process.argv.slice(2);
 const outArg = args.indexOf('--out');
@@ -25,19 +29,14 @@ const OUT = outArg >= 0 ? args[outArg + 1] : path.join(ROOT, 'neirogh.story.rbxl
 const MODULES = [
 	['StoryData', 'ReplicatedStorage/Shared/StoryData.lua'],
 	['StoryEngine', 'ReplicatedStorage/Shared/StoryEngine.lua'],
-	['Cinema', 'ReplicatedStorage/Shared/Cinema.lua'],
-	['TeleportDirector', 'ReplicatedStorage/Shared/TeleportDirector.lua'],
-	['WorldKit', 'ReplicatedStorage/Shared/WorldKit.lua'],
 ];
-const SERVER_SCRIPT = ['StoryServer', 'ServerScriptService/StoryServer.server.lua'];
-const CLIENT_SCRIPT = ['StoryClient', 'StarterPlayer/StarterPlayerScripts/StoryClient.client.lua'];
+const SERVER_SCRIPT = ['StoryWorld', 'ServerScriptService/StoryWorld.server.lua'];
 
 function fail(message) {
 	console.error(`\n✗ ${message}`);
 	process.exit(1);
 }
 
-/** Читает исходник скрипта и падает, если файла нет или он пустой. */
 function readSource(rel) {
 	const file = path.join(ROOT, 'roblox/src', rel);
 	if (!fs.existsSync(file)) fail(`нет файла ${rel}`);
@@ -46,7 +45,6 @@ function readSource(rel) {
 	return text;
 }
 
-/** Ищет ребёнка по имени среди детей узла; возвращает referent или null. */
 function childByName(dom, parentRef, name) {
 	for (const ref of dom.children(parentRef)) {
 		if (dom.instance(ref).name === name) return ref;
@@ -54,20 +52,22 @@ function childByName(dom, parentRef, name) {
 	return null;
 }
 
-/** Убирает старую копию узла, чтобы сборка была идемпотентной. */
 function dropOld(dom, parentRef, name) {
 	const old = childByName(dom, parentRef, name);
 	if (old) dom.destroy(old);
-	return Boolean(old);
 }
 
-/** Вставляет скрипт с исходником; возвращает referent. */
 function insertScript(dom, parentRef, className, name, source) {
-	return dom.insert(parentRef, {
-		className,
-		name,
-		properties: { Source: { String: source } },
-	});
+	return dom.insert(parentRef, { className, name, properties: { Source: { String: source } } });
+}
+
+function walk(dom, names) {
+	let ref = dom.rootRef;
+	for (const name of names) {
+		ref = childByName(dom, ref, name);
+		if (!ref) return null;
+	}
+	return ref;
 }
 
 const { readBinary } = await import('rbx-dom').catch(() => {
@@ -76,102 +76,139 @@ const { readBinary } = await import('rbx-dom').catch(() => {
 
 if (!fs.existsSync(SOURCE)) fail(`нет исходной карты ${path.relative(ROOT, SOURCE)}`);
 
+const story = JSON.parse(fs.readFileSync(STORY, 'utf8'));
 const t0 = Date.now();
 const dom = readBinary(fs.readFileSync(SOURCE));
 const before = dom.instanceCount;
 
-const rootRef = dom.rootRef;
-const serviceByName = new Map(
-	dom.children(rootRef).map((ref) => [dom.instance(ref).name, ref]),
-);
-
-const replicated = serviceByName.get('ReplicatedStorage');
-const serverScripts = serviceByName.get('ServerScriptService');
-const starterPlayer = serviceByName.get('StarterPlayer');
-const workspace = serviceByName.get('Workspace');
-if (!replicated || !serverScripts || !starterPlayer) {
-	fail('в карте нет ReplicatedStorage / ServerScriptService / StarterPlayer');
+const services = new Map(dom.children(dom.rootRef).map((ref) => [dom.instance(ref).name, ref]));
+const replicated = services.get('ReplicatedStorage');
+const serverScripts = services.get('ServerScriptService');
+const workspace = services.get('Workspace');
+if (!replicated || !serverScripts || !workspace) {
+	fail('в карте нет ReplicatedStorage / ServerScriptService / Workspace');
 }
 
-// ReplicatedStorage/Shared
+// ── крыло сюжета ────────────────────────────────────────────────────────────
+for (const ref of dom.children(workspace)) {
+	const inst = dom.instance(ref);
+	if (inst.className === 'Folder' && inst.name === 'StoryWing') dom.destroy(ref);
+}
+const wing = buildWing(dom, story);
+
+// ── скрипты ─────────────────────────────────────────────────────────────────
 let sharedRef = childByName(dom, replicated, 'Shared');
-const createdShared = !sharedRef;
-if (!sharedRef) {
-	sharedRef = dom.insert(replicated, { className: 'Folder', name: 'Shared' });
-}
+if (!sharedRef) sharedRef = dom.insert(replicated, { className: 'Folder', name: 'Shared' });
 
 const placed = [];
 for (const [name, rel] of MODULES) {
 	dropOld(dom, sharedRef, name);
-	const ref = insertScript(dom, sharedRef, 'ModuleScript', name, readSource(rel));
-	placed.push({ name, rel, className: 'ModuleScript', ref, at: ['ReplicatedStorage', 'Shared', name] });
+	placed.push({
+		name,
+		rel,
+		className: 'ModuleScript',
+		at: ['ReplicatedStorage', 'Shared', name],
+		ref: insertScript(dom, sharedRef, 'ModuleScript', name, readSource(rel)),
+	});
 }
 
-// ServerScriptService/StoryServer
 dropOld(dom, serverScripts, SERVER_SCRIPT[0]);
 placed.push({
 	name: SERVER_SCRIPT[0],
 	rel: SERVER_SCRIPT[1],
 	className: 'Script',
-	ref: insertScript(dom, serverScripts, 'Script', SERVER_SCRIPT[0], readSource(SERVER_SCRIPT[1])),
 	at: ['ServerScriptService', SERVER_SCRIPT[0]],
+	ref: insertScript(dom, serverScripts, 'Script', SERVER_SCRIPT[0], readSource(SERVER_SCRIPT[1])),
 });
 
-// StarterPlayer/StarterPlayerScripts/StoryClient
-let playerScripts = childByName(dom, starterPlayer, 'StarterPlayerScripts');
-if (!playerScripts) {
-	playerScripts = dom.insert(starterPlayer, { className: 'StarterPlayerScripts', name: 'StarterPlayerScripts' });
+// Старого клиента с интерфейсом быть не должно.
+const starterPlayer = services.get('StarterPlayer');
+if (starterPlayer) {
+	const playerScripts = childByName(dom, starterPlayer, 'StarterPlayerScripts');
+	if (playerScripts) {
+		for (const name of ['StoryClient', 'StoryHud']) dropOld(dom, playerScripts, name);
+	}
 }
-dropOld(dom, playerScripts, CLIENT_SCRIPT[0]);
-placed.push({
-	name: CLIENT_SCRIPT[0],
-	rel: CLIENT_SCRIPT[1],
-	className: 'LocalScript',
-	ref: insertScript(dom, playerScripts, 'LocalScript', CLIENT_SCRIPT[0], readSource(CLIENT_SCRIPT[1])),
-	at: ['StarterPlayer', 'StarterPlayerScripts', CLIENT_SCRIPT[0]],
-});
-
-// Телепорт финала должен вести в реально существующую точку карты.
-const story = JSON.parse(fs.readFileSync(path.join(ROOT, 'story/story.json'), 'utf8'));
-const teleportScene = Object.values(story.nodes).find((node) => node.teleport);
-if (!teleportScene) fail('в сюжете нет сцены с телепортом');
-const target = teleportScene.teleport.target;
-if (!Array.isArray(target) || target.length !== 3) fail('у телепорта нет координат target');
 
 const bytes = dom.toBinary({ compression: 'zstd' });
 fs.writeFileSync(OUT, bytes);
 
-// ── проверка записанного файла ───────────────────────────────────────────────
-const check = readBinary(fs.readFileSync(OUT));
-/** Идёт по именам от корня и возвращает referent (или null). */
-function walk(dom2, names) {
-	let ref = dom2.rootRef;
-	for (const name of names) {
-		ref = childByName(dom2, ref, name);
-		if (!ref) return null;
-	}
-	return ref;
-}
+const world = {
+	source: path.basename(SOURCE),
+	out: path.basename(OUT),
+	generated: new Date().toISOString().slice(0, 10),
+	wing: wing.folderName,
+	base: wing.base,
+	floor: wing.floor,
+	nextLocation: wing.nextLocation,
+	scenes: wing.scenes,
+	portals: wing.portals,
+};
+fs.mkdirSync(path.dirname(OUT_JSON), { recursive: true });
+fs.writeFileSync(OUT_JSON, JSON.stringify(world, null, 1), 'utf8');
 
-const missing = [];
+// ── проверка записанного файла ──────────────────────────────────────────────
+const check = readBinary(fs.readFileSync(OUT));
+const problems = [];
+
 for (const item of placed) {
 	const ref = walk(check, item.at);
 	const view = ref ? check.instance(ref) : null;
-	if (!view) missing.push(`${item.name} (нет узла)`);
-	else if (view.className !== item.className) missing.push(`${item.name} (${view.className})`);
-	else if (view.properties.Source?.String !== readSource(item.rel)) {
-		missing.push(`${item.name} (исходник не совпал)`);
-	}
+	if (!view) problems.push(`${item.name}: нет узла`);
+	else if (view.className !== item.className) problems.push(`${item.name}: ${view.className}`);
+	else if (view.properties.Source?.String !== readSource(item.rel)) problems.push(`${item.name}: исходник не совпал`);
 }
-if (missing.length) fail(`после записи не сошлось: ${missing.join(', ')}`);
 
-const spawn = story.meta?.map?.spawn;
-console.log('Собрано в один .rbxl');
-console.log(`  файл:        ${path.relative(ROOT, OUT)}`);
-console.log(`  размер:      ${(bytes.length / 1024).toFixed(0)} КБ (было ${(fs.statSync(SOURCE).size / 1024).toFixed(0)} КБ)`);
+const wingRef = walk(check, ['Workspace', 'StoryWing']);
+if (!wingRef) problems.push('нет Workspace.StoryWing');
+else {
+	let rooms = 0;
+	let signs = 0;
+	let portals = 0;
+	for (const ref of check.children(wingRef)) {
+		const inst = check.instance(ref);
+		if (inst.className === 'Model' && inst.name.startsWith('Scene_')) {
+			rooms++;
+			if (childByName(check, ref, 'Sign')) signs++;
+		}
+		if (inst.className === 'Folder' && inst.name.startsWith('Portal_')) portals++;
+	}
+	if (rooms !== wing.scenes.length) problems.push(`комнат ${rooms}, ожидалось ${wing.scenes.length}`);
+	if (signs !== wing.scenes.length) problems.push(`вывесок ${signs}`);
+	if (portals !== wing.portals.length) problems.push(`порталов ${portals}`);
+}
+
+// Интерфейса мы не добавляем: сколько ScreenGui/BillboardGui было в исходной
+// карте, столько и должно остаться (свои вывески — это SurfaceGui на частях).
+const countGui = (source) => {
+	let n = 0;
+	for (const inst of source.descendants()) {
+		if (['ScreenGui', 'BillboardGui', 'PlayerGui'].includes(inst.className)) n++;
+	}
+	return n;
+};
+const mapGui = countGui(readBinary(fs.readFileSync(SOURCE)));
+const fileGui = countGui(check);
+if (fileGui !== mapGui) problems.push(`появился интерфейс: было ${mapGui}, стало ${fileGui}`);
+
+let localScripts = 0;
+for (const inst of check.descendants()) {
+	if (inst.className === 'LocalScript' && inst.name.startsWith('Story')) localScripts++;
+}
+if (localScripts) problems.push(`остались клиентские скрипты: ${localScripts}`);
+
+if (problems.length) fail(`после записи не сошлось:\n  · ${problems.join('\n  · ')}`);
+
+const acts = {};
+for (const scene of wing.scenes) acts[scene.act] = (acts[scene.act] ?? 0) + 1;
+console.log('Собрано в один .rbxl — без единого элемента интерфейса');
+console.log(`  файл:        ${path.relative(ROOT, OUT)} (${(bytes.length / 1024 / 1024).toFixed(2)} МБ, было ${(fs.statSync(SOURCE).size / 1024 / 1024).toFixed(2)} МБ)`);
+console.log(`  комнат:      ${wing.scenes.length} (${Object.entries(acts).map(([a, n]) => `акт ${a}: ${n}`).join(', ')})`);
+console.log(`  персонажей:  ${wing.scenes.length} копий с карты`);
+console.log(`  порталов:    ${wing.portals.length}, последний → ${JSON.stringify(wing.nextLocation)}`);
+console.log(`  вывесок:     ${wing.scenes.length} (SurfaceGui на части, как на карте)`);
+console.log(`  скриптов:    ${placed.length} (${placed.map((p) => p.name).join(', ')}) — ни одного LocalScript`);
+console.log(`  интерфейс:   ${fileGui} объекта(ов) из исходной карты, своих нет`);
 console.log(`  инстансов:   ${before} → ${check.instanceCount}`);
-console.log(`  скриптов:    ${placed.length} (${placed.map((p) => p.name).join(', ')})`);
-console.log(`  Services:    ReplicatedStorage${createdShared ? ' (+Shared)' : '/Shared'}, ServerScriptService, StarterPlayerScripts`);
-console.log(`  телепорт:    ${teleportScene.teleport.id} → [${target.join(', ')}] · ${teleportScene.teleport.placeId}`);
-if (spawn) console.log(`  спавн:       [${spawn.join(', ')}]`);
+console.log(`  раскладка:   ${path.relative(ROOT, OUT_JSON)}`);
 console.log(`  время:       ${Date.now() - t0} мс`);

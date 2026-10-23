@@ -16,7 +16,8 @@
     "test:place": "node tools/test-place-file.mjs",
     "test:uploader": "node tools/test-uploader.mjs",
     "serve": "python3 -m http.server 8080 --bind 0.0.0.0 --directory .",
-    "route": "node tools/render-route.mjs"
+    "world": "node tools/build-world.mjs",
+    "scheme": "node tools/render-wing.mjs"
   },
   "devDependencies": {
     "@luau-rs/luau": "^0.739.0",
