@@ -35,13 +35,14 @@ const cellW = (W - pad * 2) / scenes.length;
 push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="720" viewBox="0 0 ${W} 720" font-family="ui-sans-serif, system-ui, sans-serif">`);
 push(`<rect width="${W}" height="720" fill="#0b0e16"/>`);
 push(`<text x="${pad}" y="52" fill="#e8ecf6" font-size="27" font-weight="600">Крыло сюжета: 95 комнат из моделей neirogh.rbxl</text>`);
-push(`<text x="${pad}" y="78" fill="#8b93a7" font-size="14">каждая сцена — копия модели Room · персонаж сцены — копия модели с карты · между комнатами портал «Teleport One Way» · никакого интерфейса</text>`);
+push(`<text x="${pad}" y="78" fill="#8b93a7" font-size="14">сцена = комната из моделей плейса · в комнате двое актёров · реплики короткие, действия — позами (шаг, удар, захват) · интерфейса нет</text>`);
 
 for (const scene of scenes) {
 	const x = pad + scene.index * cellW;
 	const act = ACT[scene.act] ?? ACT[1];
 	const h = 26 + (scene.act - 1) * 6;
-	push(`<rect x="${x.toFixed(1)}" y="${(stripY + 40 - h / 2).toFixed(1)}" width="${(cellW - 1.5).toFixed(1)}" height="${h}" rx="2" fill="${act.color}" fill-opacity="0.85"><title>${scene.index + 1}. ${scene.id} — ${scene.scene} · ${scene.character}</title></rect>`);
+	const lines = (scene.lines ?? []).map((l) => `${l.s}: ${l.t}`).join(' / ');
+	push(`<rect x="${x.toFixed(1)}" y="${(stripY + 40 - h / 2).toFixed(1)}" width="${(cellW - 1.5).toFixed(1)}" height="${h}" rx="2" fill="${act.color}" fill-opacity="0.85"><title>${scene.index + 1}. ${scene.id} — ${scene.scene}\n${lines}</title></rect>`);
 }
 
 // подписи актов и порталы
@@ -66,7 +67,7 @@ push(`<text x="${W - pad + 4}" y="${stripY + 18}" fill="#f97316" font-size="12">
 const planTop = 330;
 const planH = 250;
 push(`<text x="${pad}" y="${planTop - 24}" fill="#e8ecf6" font-size="19" font-weight="600">Как устроена одна комната</text>`);
-push(`<text x="${pad}" y="${planTop}" fill="#8b93a7" font-size="13">вид сверху: ${scenes[18]?.id ?? 'сцена'} · ${scenes[18]?.scene ?? ''}</text>`);
+push(`<text x="${pad}" y="${planTop}" fill="#8b93a7" font-size="13">вид сверху: ${scenes[18]?.id ?? 'сцена'} · ${scenes[18]?.scene ?? ''} · реплики: ${(scenes[18]?.lines ?? []).map((l) => l.t).join(' / ')}</text>`);
 
 const sample = scenes[18] ?? scenes[0];
 const roomW = world.base.roomWidth;
@@ -81,17 +82,36 @@ const dot = (p, color, label, r = 9) => {
 };
 
 dot(sample.arrival, '#7dd3fc', 'вход · сюда выбрасывает портал');
-if (sample.character) {
-	// персонаж стоит между входом и вывеской
-	dot([sample.center[0] - 3, sample.center[2]], '#a3e635', `персонаж: ${sample.character}`, 11);
-}
-dot([sample.sign[0], sample.sign[2]], '#e2e8f0', 'вывеска с текстом сцены', 8);
+(sample.actors ?? []).forEach((actor, i) => {
+	dot(actor.at, '#a3e635', `${actor.name} · лицом к игроку (${actor.facing}°)`, 11);
+});
+const signW = 12 * ((W - pad * 2 - 80) / roomW);
+push(`<rect x="${(sx(sample.sign[0]) - signW / 2).toFixed(1)}" y="${(sz(sample.sign[2]) - 4).toFixed(1)}" width="${signW.toFixed(1)}" height="8" rx="2" fill="#e2e8f0" fill-opacity="0.9"/>`);
+push(`<text x="${sx(sample.sign[0]).toFixed(1)}" y="${(sz(sample.sign[2]) - 10).toFixed(1)}" fill="#e2e8f0" font-size="12" text-anchor="middle">вывеска с текстом сцены</text>`);
 dot([sample.exit[0], sample.exit[2]], '#f97316', 'выход · портал дальше', 8);
 
 // ось «вперёд»
 push(`<line x1="${sx(sample.arrival[0]).toFixed(1)}" y1="${(planTop + planH + 30).toFixed(1)}" x2="${sx(sample.exit[0]).toFixed(1)}" y2="${(planTop + planH + 30).toFixed(1)}" stroke="#2b3446" stroke-width="2" marker-end="url(#arrow)"/>`);
 push(`<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2b3446"/></marker></defs>`);
 push(`<text x="${((sx(sample.arrival[0]) + sx(sample.exit[0])) / 2).toFixed(1)}" y="${(planTop + planH + 52).toFixed(1)}" fill="#5d6884" font-size="12" text-anchor="middle">игрок идёт вперёд</text>`);
+
+// панель поз: что видит игрок вместо описания драки
+const poseY = 470;
+push(`<text x="${pad}" y="${poseY - 16}" fill="#e8ecf6" font-size="17" font-weight="600">Действия — позами, а не текстом</text>`);
+const poses = [
+	['step', 'шагнул вперёд'],
+	['punch', 'ударил'],
+	['throw', 'замахнулся'],
+	['choke', 'взял за горло'],
+	['block', 'закрылся'],
+	['kneel', 'опустился на колено'],
+];
+poses.forEach(([pose, label], i) => {
+	const x = pad + i * 210;
+	push(`<rect x="${x}" y="${poseY}" width="150" height="34" rx="6" fill="#151b29" stroke="#25304a"/>`);
+	push(`<text x="${x + 10}" y="${poseY + 22}" fill="#a3e635" font-size="13" font-family="ui-monospace, monospace">${pose}</text>`);
+	push(`<text x="${x + 78}" y="${poseY + 22}" fill="#8b93a7" font-size="12">${label}</text>`);
+});
 
 // легенда снизу
 let lx = pad;

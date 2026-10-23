@@ -252,7 +252,7 @@ go(engine, "«Тогда решай я»")
 go(engine, "Отдать огонь Артинсу и уйти в пламя")
 view = engine:current()
 check("финал — Артём мёртв", view.isEnding and view.ending.id == "ash", view.ending and view.ending.id)
-check("текст концовки длинный", view.ending and #view.ending.text > 200)
+check("текст концовки короткий, но полный", view.ending and #view.ending.text > 40 and #view.ending.text < 400)
 check("состояние запомнило концовку", engine.state.ending == "ash")
 
 --------------------------------------------------------------------------------
@@ -371,7 +371,7 @@ local finalEndings = {}
 for _, outcome in ipairs(outcomes) do
 	if outcome.ending then
 		finalEndings[outcome.ending.id] = true
-		check("финал «" .. outcome.ending.title .. "» — смерть", (outcome.ending.text:find("умираешь", 1, true) ~= nil or outcome.ending.text:find("умер", 1, true) ~= nil or outcome.ending.text:find("пепел", 1, true) ~= nil or outcome.ending.text:find("остыв", 1, true) ~= nil or outcome.ending.text:find("перестаёшь", 1, true) ~= nil))
+		check("финал «" .. outcome.ending.title .. "» — смерть", (outcome.ending.text:find("умираешь", 1, true) ~= nil or outcome.ending.text:find("умер", 1, true) ~= nil or outcome.ending.text:find("пепел", 1, true) ~= nil or outcome.ending.text:find("остыв", 1, true) ~= nil or outcome.ending.text:find("перестаёшь", 1, true) ~= nil or outcome.ending.text:find("гаснет", 1, true) ~= nil or outcome.ending.text:find("умирает", 1, true) ~= nil or outcome.ending.text:find("пепле", 1, true) ~= nil))
 	end
 end
 check("все три концовки — в финальном выборе", finalEndings.ash and finalEndings.shard and finalEndings.loop)

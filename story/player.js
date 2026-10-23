@@ -96,6 +96,12 @@ export class StoryPlayer {
       speaker: speaker.name ?? '',
       color: speaker.color ?? '#ffffff',
       text: this.interpolate(this.resolveText(node)),
+      // Короткие реплики сцены: кто говорит и что делает (поза — для игры).
+      lines: (node.lines ?? []).map((line) => ({
+        name: this.data.characters?.[line.s]?.name ?? '',
+        text: this.interpolate(line.t ?? ''),
+        pose: line.pose ?? 'say',
+      })),
       choices: [],
       isEnding: Boolean(node.ending),
       animations: node.animations ?? [],

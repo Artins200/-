@@ -268,7 +268,11 @@ function render(view) {
     choicesBox.append(button);
   }
 
-  typeText($('text'), view.text, () => {
+  // В читалке видно, кто говорит; поза подписана мелким шрифтом.
+  const script = (view.lines ?? []).length
+    ? view.lines.map((line) => `${line.name ? line.name + ': ' : ''}«${line.text}»${line.pose && line.pose !== 'say' ? '  · ' + line.pose : ''}`).join('\n')
+    : view.text;
+  typeText($('text'), script, () => {
     for (const choice of view.choices) {
       const button = document.createElement('button');
       button.className = 'choice';

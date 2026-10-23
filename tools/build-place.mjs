@@ -7,7 +7,7 @@
 // Что внутри:
 //   Workspace.StoryWing      95 комнат (копии модели Room) с персонажами и вывесками,
 //                            между комнатами — порталы «Teleport One Way» из этого плейса;
-//   ReplicatedStorage/Shared StoryData, StoryEngine;
+//   ReplicatedStorage/Shared StoryData, StoryEngine, Pose;
 //   ServerScriptService      StoryWorld — единственный скрипт, ни одного ScreenGui.
 //
 // Повторный запуск не плодит дубликаты: старое крыло и скрипты удаляются.
@@ -29,6 +29,7 @@ const OUT = outArg >= 0 ? args[outArg + 1] : path.join(ROOT, 'neirogh.story.rbxl
 const MODULES = [
 	['StoryData', 'ReplicatedStorage/Shared/StoryData.lua'],
 	['StoryEngine', 'ReplicatedStorage/Shared/StoryEngine.lua'],
+	['Pose', 'ReplicatedStorage/Shared/Pose.lua'],
 ];
 const SERVER_SCRIPT = ['StoryWorld', 'ServerScriptService/StoryWorld.server.lua'];
 
@@ -140,6 +141,7 @@ const world = {
 	wing: wing.folderName,
 	base: wing.base,
 	floor: wing.floor,
+	spawn: wing.spawn,
 	nextLocation: wing.nextLocation,
 	scenes: wing.scenes,
 	portals: wing.portals,

@@ -151,6 +151,59 @@ function setSignText(dom, signRef, text, width) {
 	return true;
 }
 
+/** Угол поворота (градусы), при котором модель смотрит из from в to.
+ *  В Roblox при rotY = 0 взгляд направлен в −Z, а поворот считается вокруг Y. */
+export function yawTowards(from, to) {
+	const dx = to[0] - from[0];
+	const dz = to[1] - from[1];
+	if (dx === 0 && dz === 0) return 0;
+	return (Math.atan2(-dx, -dz) * 180) / Math.PI;
+}
+
+/** Портал из плейса, но открывается только когда сцена доиграна. */
+const GATED_PORTAL = `local a = script.Parent.TeleportPart1
+local b = script.Parent.TeleportPart2
+local open = script.Parent:FindFirstChild("Open")
+
+a.Touched:Connect(function(hit)
+	local w = hit.Parent and hit.Parent:FindFirstChild("HumanoidRootPart")
+	if not w then
+		return
+	end
+	if open and not open.Value then
+		return
+	end
+	w.CFrame = b.CFrame + Vector3.new(0, 5, 0)
+end)
+`;
+
+function gatePortal(dom, folderRef, open) {
+	const kids = childrenOf(dom, folderRef);
+	const script = kids.find((k) => k.className === 'Script');
+	if (script) dom.setProperty(script.referent, 'Source', { String: GATED_PORTAL });
+	let flag = kids.find((k) => k.className === 'BoolValue');
+	if (!flag) {
+		const ref = dom.insert(folderRef, { className: 'BoolValue', name: 'Open' });
+		dom.setProperty(ref, 'Value', { Bool: open });
+		flag = dom.instance(ref);
+	}
+	dom.setProperty(flag.referent, 'Value', { Bool: open });
+}
+
+/** Красит все части модели в цвет персонажа, чтобы копии не были близнецами. */
+function tint(dom, ref, color) {
+	if (!color) return 0;
+	const PARTS = new Set(['Part', 'MeshPart', 'UnionOperation', 'WedgePart', 'TrussPart', 'CornerWedgePart', 'Seat', 'SpawnLocation']);
+	let n = 0;
+	for (const inst of [dom.instance(ref), ...dom.descendants(ref)]) {
+		if (!inst || !PARTS.has(inst.className)) continue;
+		if (!inst.properties?.Color) continue;
+		dom.setProperty(inst.referent, 'Color', { Color3: color });
+		n++;
+	}
+	return n;
+}
+
 /** Плоская часть-метка: так игрок видит, куда идти, без всякого интерфейса. */
 function makePart(dom, parent, name, position, size, color, transparency = 0) {
 	const ref = dom.insert(parent, {
@@ -214,6 +267,46 @@ export function buildWing(dom, story, options = {}) {
 
 	const scenes = [];
 	const removed = { characters: 0, parts: 0 };
+	const poseName = (line) => line.pose || 'say';
+
+	const SPEAKABLE = ['Артём', 'Артинс', 'Лира', 'Демид', 'Ваня', 'МАМА', 'Кай Вэрн', 'Некит', 'Богдан', 'Карина', 'Ярик'];
+
+	/** Второй участник сцены: следующий, кто заговорит дальше по сюжету. */
+	function partnerFor(id, exclude) {
+		const start = orderOf(id);
+		for (let step = 1; step <= 6; step++) {
+			const node = (story.nodes ?? [])[start + step];
+			if (!node) break;
+			for (const line of node.lines ?? []) {
+				const name = characterName(line.s);
+				if (name && name !== exclude && SPEAKABLE.includes(name)) return name;
+			}
+		}
+		return exclude === 'Артём' ? 'Артинс' : 'Артём';
+	}
+
+	const orderOf = (id) => (story.nodes ?? []).findIndex((n) => n.id === id);
+
+	// Кто играет сцену: все, кто говорит в репликах, без повторов.
+	function actorsOf(node) {
+		const names = [];
+		for (const line of node.lines ?? []) {
+			const name = characterName(line.s);
+			const key = name && characters.has(name) ? name : name;
+			if (!key) continue;
+			if (key === 'Артём' || key === 'Артинс' || key === 'Лира' || key === 'Демид' || key === 'Ваня'
+				|| key === 'МАМА' || key === 'Кай Вэрн' || key === 'Некит' || key === 'Богдан' || key === 'Карина' || key === 'Ярик') {
+				if (!names.includes(key)) names.push(key);
+			}
+		}
+		if (!names.length) names.push('Артём');
+		// В комнате всегда двое: если говорит один, второй стоит рядом и слушает.
+		if (names.length === 1) {
+			const partner = partnerFor(node.id, names[0]);
+			if (partner) names.push(partner);
+		}
+		return names.slice(0, 3);
+	}
 
 	order.forEach((id, index) => {
 		const node = byId[id];
@@ -237,29 +330,62 @@ export function buildWing(dom, story, options = {}) {
 
 		const floor = box.y[0] + FLOOR;
 
-		// 3. Персонаж сцены: копия модели с карты, ставим вперёд, лицом к входу.
-		const pick = characterFor(node);
-		const charRef = dom.cloneWithin(pick.ref);
-		dom.transferWithin(charRef, roomRef);
-		dom.setName(charRef, pick.name || 'Персонаж');
-		const charBox = measure(dom, charRef);
-		const charCenter = [(charBox.x[0] + charBox.x[1]) / 2, (charBox.z[0] + charBox.z[1]) / 2];
-		place(dom, charRef, {
-			pivot: [charCenter[0], charBox.y[0], charCenter[1]],
-			delta: [cx - 3 - charCenter[0], floor - charBox.y[0], cz - charCenter[1]],
-			rotY: 90, // лицом к входу (−X), как ставят персонажей в комнатах карты
+		// 3. Актёры сцены: копии моделей с карты, лицом друг к другу.
+		const actors = [];
+		const names = actorsOf(node);
+		// Сцена как на подмостках: актёры по краям, между ними вывеска,
+		// все трое развёрнуты к игроку, который входит слева по −X.
+		const spots = [
+			[4.5, -6.6, 110],
+			[4.5, 6.6, 70],
+			[9.5, -10.4, 100],
+		];
+		names.forEach((name, seat) => {
+			const pick = characterFor({ speaker: Object.keys(story.characters ?? {}).find((k) => characterName(k) === name) ?? node.speaker });
+			const charRef = dom.cloneWithin(pick.ref);
+			dom.transferWithin(charRef, roomRef);
+			dom.setName(charRef, name);
+			const charBox = measure(dom, charRef);
+			const center = [(charBox.x[0] + charBox.x[1]) / 2, (charBox.z[0] + charBox.z[1]) / 2];
+			const [offset, offsetZ, facing] = spots[seat] ?? [4.5, 0, 90];
+			// Модели персонажей на карте уже стоят повёрнутыми на −90°, компенсируем.
+			const MODEL_BASE_YAW = 90;
+			place(dom, charRef, {
+				pivot: [center[0], charBox.y[0], center[1]],
+				delta: [cx + offset - center[0], floor - charBox.y[0], cz + offsetZ - center[1]],
+				rotY: facing + MODEL_BASE_YAW,
+			});
+			const palette = {
+				'Артём': [0.55, 0.72, 0.95],
+				'Артинс': [0.98, 0.55, 0.15],
+				'Лира': [0.95, 0.55, 0.75],
+				'МАМА': [0.72, 0.9, 0.35],
+				'Кай Вэрн': [0.98, 0.8, 0.3],
+				'Демид': [0.3, 0.7, 0.95],
+				'Ваня': [0.95, 0.35, 0.35],
+				'Некит': [0.95, 0.3, 0.45],
+				'Богдан': [0.92, 0.7, 0.2],
+				'Карина': [0.9, 0.4, 0.7],
+				'Ярик': [0.2, 0.85, 0.85],
+			};
+			tint(dom, charRef, palette[name]);
+			actors.push({ name, at: [cx + offset, floor, cz + offsetZ], facing: Math.round(facing * 10) / 10 });
 		});
+		const pick = { name: names[0] };
 
 		// 4. Вывеска с текстом сцены — копия вывески этого плейса.
 		const signRef = dom.cloneWithin(signProto);
 		dom.transferWithin(signRef, roomRef);
 		dom.setName(signRef, 'Sign');
 		const speaker = characterName(node.speaker);
-		const label = [speaker ? `${speaker}:` : node.scene ?? '', story.nodes.find((n) => n.id === id)?.text ?? '']
-			.filter(Boolean)
-			.join(' ');
+		const firstLine = (node.lines ?? [])[0];
+		const label = firstLine ? firstLine.t : node.text ?? '';
 		setSignText(dom, signRef, label, SIGN_W);
-		placePart(dom, signRef, [cx + 8, floor + 3.3, cz], 90);
+		dom.setProperty(signRef, 'CanCollide', { Bool: false });
+		dom.setProperty(signRef, 'CanTouch', { Bool: false });
+		// Вывеска — экран на дальней стороне комнаты, лицом к входящему игроку.
+		// У вывески текст на передней грани (−Z), поэтому поворот 180° к игроку.
+		placePart(dom, signRef, [cx + 8, floor + 3.4, cz], 180);
 
 		// 5. Метка входа и метка портала — части в стиле телепортов.
 		const arrival = makePart(dom, roomRef, 'Arrival', [cx - 15, floor + 1.2, cz], [6, 0.6, 6], [0.49, 0.83, 0.99], 0.35);
@@ -273,13 +399,49 @@ export function buildWing(dom, story, options = {}) {
 			scene: node.scene ?? '',
 			speaker: speaker || pick.name,
 			room: `Scene_${id}`,
-			character: pick.name,
+			character: names[0],
+			actors,
+			lines: (node.lines ?? []).map((line) => ({
+				s: characterName(line.s),
+				t: line.t,
+				pose: poseName(line),
+			})),
 			sign: [cx + 8, floor + 3.3, cz],
 			arrival: [cx - 15, floor + 3.2, cz],
 			exit: [cx + 16, floor + 0.4, cz],
 			center: [cx, floor, cz],
 		});
 	});
+
+	// 5.1 Пол под всей линией: комнаты стоят вплотную по X, между ними щель,
+	// поэтому под крылом идёт сплошная плита — с неё нельзя провалиться.
+	const firstX = scenes[0].center[0];
+	const lastX = scenes[scenes.length - 1].center[0];
+	const floorWidth = Math.abs(firstX - lastX) + roomWidth * 2;
+	const floorY = box.y[0] + FLOOR;
+	const platform = makePart(dom, wing, 'Floor', [(firstX + lastX) / 2, floorY - 0.5, BASE_Z], [floorWidth, 1, 46], [0.22, 0.24, 0.28]);
+	dom.setProperty(platform, 'Material', { Enum: 816 }); // Concrete
+	dom.setProperty(platform, 'CanCollide', { Bool: true });
+	dom.setProperty(platform, 'CanTouch', { Bool: true });
+	dom.setProperty(platform, 'Transparency', { Float32: 0 });
+
+	// Точка появления в первой комнате: респавн не выбрасывает на карту.
+	const spawnPart = dom.insert(wing, {
+		className: 'SpawnLocation',
+		name: 'StorySpawn',
+		properties: {
+			Anchored: { Bool: true },
+			CanCollide: { Bool: true },
+			Neutral: { Bool: true },
+			Duration: { Int32: 0 },
+			Transparency: { Float32: 0.4 },
+			Color: { Color3: [0.49, 0.83, 0.99] },
+			Size: { Vector3: [6, 0.6, 6] },
+		},
+	});
+	// Появление — чуть раньше входа в первую комнату и лицом к вывеске (+X).
+	const entry = scenes[0].arrival;
+	placePart(dom, spawnPart, [entry[0] - 6, entry[1], entry[2]], -90);
 
 	// 6. Портал из каждой комнаты в следующую — папка "Teleport One Way" как в плейсе.
 	const portals = [];
@@ -294,6 +456,7 @@ export function buildWing(dom, story, options = {}) {
 		const p2 = kids.find((k) => k.name === 'TeleportPart2');
 		placePart(dom, p1.referent, from.exit);
 		placePart(dom, p2.referent, [to.arrival[0], to.arrival[1] - 3.2, to.arrival[2]]);
+		gatePortal(dom, folderRef, false);
 		portals.push({ id: `Portal_${from.id}`, from: from.exit, to: to.arrival, next: to.id });
 	}
 
@@ -309,6 +472,7 @@ export function buildWing(dom, story, options = {}) {
 		const p2 = kids.find((k) => k.name === 'TeleportPart2');
 		placePart(dom, p1.referent, [last.exit[0] + 10, last.exit[1], last.exit[2]]);
 		placePart(dom, p2.referent, nextLocation);
+		gatePortal(dom, finalRef, false);
 		portals.push({ id: 'Portal_Final', from: [last.exit[0] + 10, last.exit[1], last.exit[2]], to: nextLocation, next: null });
 	}
 
@@ -321,6 +485,7 @@ export function buildWing(dom, story, options = {}) {
 		portals,
 		nextLocation,
 		removed,
+		spawn: scenes[0].arrival,
 		characterCount: characters.size,
 	};
 }

@@ -50,7 +50,7 @@ console.log('— базовые проверки');
 	const player = fresh();
 	const view = player.current();
 	check('старт', view.id === 'start');
-	check('текст сцены', view.text.length > 40);
+	check('текст сцены не пустой', view.text.length > 10);
 	check('выборов два', view.choices.length === 2);
 	check('глава заполнена', typeof view.chapter === 'string' && view.chapter.length > 0);
 	check('сцена не помечена концовкой', view.isEnding === false);
@@ -62,7 +62,40 @@ console.log('— сюжет собран в одну линию');
 	check('четыре акта', [1, 2, 3, 4].every((act) => acts.has(act)), [...acts].join(','));
 	check('сцен больше восьмидесяти', story.nodes.length > 80, story.nodes.length);
 	const words = story.nodes.reduce((sum, node) => sum + String(node.text ?? '').split(/\s+/).filter(Boolean).length, 0);
-	check('слов больше четырёх тысяч', words > 4000, words);
+	check('слов не меньше шестисот', words > 600, words);
+	check('слов меньше двух тысяч (короткие фразы, а не простыни)', words < 2000, words);
+
+	// Реплики: короткие, с позами, не больше четырёх на сцену.
+	const POSES = new Set(['idle','say','point','step','reach','grab','punch','throw','block','choke','guard','kneel','fall']);
+	const noLines = story.nodes.filter((n) => !Array.isArray(n.lines) || n.lines.length === 0);
+	check('у каждой сцены есть реплики', noLines.length === 0, noLines.map((n) => n.id).join(', '));
+	const tooFew = story.nodes.filter((n) => (n.lines ?? []).length < 2);
+	check('в каждой сцене минимум две реплики', tooFew.length === 0, tooFew.map((n) => n.id).join(', '));
+	const tooMany = story.nodes.filter((n) => (n.lines ?? []).length > 4);
+	check('на сцену не больше четырёх реплик', tooMany.length === 0, tooMany.map((n) => n.id).join(', '));
+	const tooLong = [];
+	const badPose = [];
+	const noAction = [];
+	for (const node of story.nodes) {
+		for (const line of node.lines ?? []) {
+			if (String(line.t).length > 110) tooLong.push(node.id);
+			if (!POSES.has(line.pose)) badPose.push(`${node.id}:${line.pose}`);
+		}
+	}
+	check('ни одна реплика не длиннее 110 символов', tooLong.length === 0, tooLong.join(', '));
+	check('у всех реплик известная поза', badPose.length === 0, badPose.slice(0, 5).join(', '));
+	const actions = story.nodes.flatMap((n) => n.lines ?? []).filter((l) => ['punch','throw','choke','grab','block','reach','fall','kneel','step'].includes(l.pose));
+	check('действия показаны позами, а не текстом', actions.length > 40, actions.length);
+	check('есть удары и захваты', ['punch','choke','throw','grab'].every((p) => actions.some((l) => l.pose === p)));
+
+	// Рассказчик — только подпись места или финальная строка. Драку он не описывает.
+	const captions = story.nodes.filter((n) => (n.lines ?? []).some((l) => l.s === 'narrator' && !n.isEnding));
+	check('подпись рассказчика не больше одной на сцену', captions.every((n) => n.lines.filter((l) => l.s === 'narrator').length === 1));
+	check('рассказчик не играет позами', story.nodes.every((n) => n.lines.every((l) => l.s !== 'narrator' || l.pose === 'idle')));
+	const silentScenes = story.nodes.filter((n) => !(n.lines ?? []).some((l) => l.s !== 'narrator' && l.s !== ''));
+	check('в каждой сцене говорят персонажи', silentScenes.length === 0, silentScenes.map((n) => n.id).join(', '));
+	const allText = story.nodes.flatMap((n) => (n.lines ?? []).map((l) => l.t));
+	check('ни одна реплика не повторяется', new Set(allText).size === allText.length);
 	const finalChapter = story.nodes.find((node) => (node.chapter ?? '').includes('Жестокий сплав огня и ревности'));
 	check('есть глава «Жестокий сплав огня и ревности»', Boolean(finalChapter));
 	check('глава идёт последней (акт 4)', finalChapter?.act === 4);
