@@ -16,13 +16,39 @@
 ```bash
 npm install
 npm run build     # story.json → StoryData.lua + docs/ГРАФ.md, с проверками
-npm test          # граф + карта + синтаксис Luau + 80 тестов логики + 104 плеера + 34 карты + 41 загрузчика
+npm test          # граф + карта + синтаксис Luau + 80 логики + 104 плеера + 34 карты + 26 файла места + 41 загрузчика
 npm run map       # пересобрать карту из neirogh.rbxl (нужен rbx-dom) и пересчитать связи
+npm run place     # собрать ОДИН файл neirogh.story.rbxl: карта + вся новелла внутри
 npm run serve     # сервер: /uploader/ (загрузка игры) и /story/preview.html (чтение сюжета)
 ```
 
 Играть в демо: `rojo serve roblox/default.project.json` → Studio → Rojo Connect.
 Без Rojo — инструкция в [`docs/КАК_ЭТО_СВЯЗАТЬ.md`](docs/КАК_ЭТО_СВЯЗАТЬ.md).
+
+## Один файл .rbxl
+
+[`neirogh.story.rbxl`](neirogh.story.rbxl) — всё в одном файле: исходная карта
+(42 265 объектов: школа, коридор вывесок, 50 очагов огня, авторские телепорты)
+плюс движок новеллы.
+
+1. Скачай файл и открой его в Roblox Studio (`File → Open from File`).
+2. Нажми **Play** — в `StarterPlayerScripts` уже лежит клиент, он сам собирает
+   интерфейс: текст с печатной машинкой, выборы, инвентарь, анимации,
+   кнопка телепорта в финальной главе.
+3. Ставить руками ничего не нужно: `ReplicatedStorage/Shared` (4 модуля),
+   `ServerScriptService/StoryServer` и `StarterPlayer/StarterPlayerScripts/StoryClient`
+   уже внутри.
+
+Пересобрать после правок сюжета или скриптов:
+
+```bash
+npm i --no-save rbx-dom   # разбор и запись .rbxl
+npm run build             # story.json → StoryData.lua
+npm run place             # → neirogh.story.rbxl
+```
+
+Сборка идемпотентна: повторный запуск не плодит дубликаты скриптов.
+`npm test` сам пересобирает файл и проверяет, что он не отстал от `roblox/src`.
 
 ## Загрузить свою игру
 
@@ -46,12 +72,15 @@ npm run serve     # сервер: /uploader/ (загрузка игры) и /sto
 | [`docs/ГРАФ.md`](docs/ГРАФ.md) | граф сцен (генерируется) |
 | [`roblox/`](roblox/) | Luau: движок, сервер, клиентский UI, Rojo-проект |
 | [`story/preview.html`](story/preview.html) | прочитать/проиграть сюжет в браузере, без Studio |
+| [`neirogh.story.rbxl`](neirogh.story.rbxl) | **готовая игра одним файлом**: карта + новелла, открывается в Studio |
+| [`neirogh.rbxl`](neirogh.rbxl) | исходная карта, из неё собирается всё остальное |
 | [`game/place-map.json`](game/place-map.json) | координаты, вывески, огни и телепорты, снятые с `neirogh.rbxl` |
 | [`game/layout.json`](game/layout.json) | связанность моделей: кластеры, рёбра, арена финала |
 | [`docs/КАРТА.md`](docs/КАРТА.md) | отчёт по координатам: что с чем связано и куда ведёт телепорт |
 | [`uploader/index.html`](uploader/index.html) | страница загрузки игры в GitHub |
 | [`game/`](game/) | сюда попадает загруженное место и его скрипты |
 | [`tests/`](tests/) | тесты логики на Luau |
+| [`tools/build-place.mjs`](tools/build-place.mjs) | сборка `neirogh.story.rbxl` из карты и скриптов |
 | [`tools/`](tools/) | сборка, проверка синтаксиса, тесты |
 
 ## Как проверяется сюжет
@@ -67,5 +96,10 @@ npm run serve     # сервер: /uploader/ (загрузка игры) и /sto
 Отдельно проверяется карта (`tools/test-place-map.mjs`): координаты конечные,
 все вывески разложены по кластерам, огонь — одна полоса, а цель телепорта
 совпадает с центром огня в `layout.json`.
+
+И собранный файл (`tools/test-place-file.mjs`): бинарный заголовок `.rbxl`,
+DataModel в корне, 4 модуля в `ReplicatedStorage/Shared`, серверный и клиентский
+скрипты на своих местах, исходники совпадают с `roblox/src`, геометрия карты и
+огни не потеряны, `StoryServer` не размножился.
 
 Сюжет правится в JSON, Luau-данные и граф пересобираются автоматически.

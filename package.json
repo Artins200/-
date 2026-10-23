@@ -9,9 +9,11 @@
     "check": "node tools/build-story.mjs && node tools/analyze-place.mjs --check",
     "check:syntax": "node tools/check-syntax.mjs",
     "map": "node tools/place-import.mjs neirogh.rbxl game/place-map.json && node tools/analyze-place.mjs",
-    "test": "node tools/build-story.mjs && node tools/test-builder.mjs && node tools/check-syntax.mjs && node tools/run-luau-tests.mjs && node tools/test-story-player.mjs && node tools/test-place-map.mjs && node tools/test-uploader.mjs",
+    "place": "node tools/build-place.mjs",
+    "test": "node tools/build-story.mjs && node tools/test-builder.mjs && node tools/check-syntax.mjs && node tools/run-luau-tests.mjs && node tools/test-story-player.mjs && node tools/test-place-map.mjs && node tools/test-place-file.mjs --build && node tools/test-uploader.mjs",
     "test:story": "node tools/build-story.mjs && node tools/test-builder.mjs && node tools/run-luau-tests.mjs && node tools/test-story-player.mjs",
     "test:map": "node tools/analyze-place.mjs --check && node tools/test-place-map.mjs",
+    "test:place": "node tools/test-place-file.mjs",
     "test:uploader": "node tools/test-uploader.mjs",
     "serve": "python3 -m http.server 8080 --bind 0.0.0.0 --directory ."
   },
