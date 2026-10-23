@@ -19,6 +19,7 @@ const storyData = read('roblox/src/ReplicatedStorage/Shared/StoryData.lua');
 const engine = read('roblox/src/ReplicatedStorage/Shared/StoryEngine.lua');
 const cinema = read('roblox/src/ReplicatedStorage/Shared/Cinema.lua');
 const teleport = read('roblox/src/ReplicatedStorage/Shared/TeleportDirector.lua');
+const world = read('roblox/src/ReplicatedStorage/Shared/WorldKit.lua');
 const spec = read('tests/engine_spec.luau');
 
 // Модули Roblox возвращают таблицу через `return` — оборачиваем каждый в функцию.
@@ -37,6 +38,10 @@ end)()
 
 local TeleportDirector = (function()
 ${teleport}
+end)()
+
+local WorldKit = (function()
+${world}
 end)()
 
 ${spec}

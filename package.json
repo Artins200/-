@@ -15,7 +15,8 @@
     "test:map": "node tools/analyze-place.mjs --check && node tools/test-place-map.mjs",
     "test:place": "node tools/test-place-file.mjs",
     "test:uploader": "node tools/test-uploader.mjs",
-    "serve": "python3 -m http.server 8080 --bind 0.0.0.0 --directory ."
+    "serve": "python3 -m http.server 8080 --bind 0.0.0.0 --directory .",
+    "route": "node tools/render-route.mjs"
   },
   "devDependencies": {
     "@luau-rs/luau": "^0.739.0",

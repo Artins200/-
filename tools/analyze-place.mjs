@@ -197,6 +197,16 @@ for (const c of clusters) {
   if (c.signCount < 1) errors.push(`кластер ${c.id} без текста`);
 }
 
+// Живые НПС: модели с Humanoid, у которых есть координата.
+// Мусорные имена («хз», «пиздец что это?») в маршрут не пускаем.
+const JUNK = /^(хз|пиздец.*|.*\?$)/i;
+const cast = (map.cast ?? [])
+  .filter((c) => c.pos && c.name && !JUNK.test(c.name) && c.name.length <= 24)
+  .map((c) => {
+    const near = nearestCluster(c.pos);
+    return { name: c.name, pos: c.pos, cluster: near ? near.cluster.id : null };
+  });
+
 const layout = {
   source: map.source,
   generated: new Date().toISOString().slice(0, 10),
@@ -204,6 +214,7 @@ const layout = {
   constants: { GAP, BAND, NEAR, FIRE_RADIUS },
   clusters,
   actorsTotal: actors.length,
+  cast,
   fireZone,
   teleports,
   links,
@@ -236,7 +247,7 @@ const doc = `# Карта и связанность моделей
 > Сгенерировано \`node tools/analyze-place.mjs\` из \`game/place-map.json\`.
 > Карту достаёт \`node tools/place-import.mjs neirogh.rbxl game/place-map.json\` (нужен \`rbx-dom\`).
 
-**Вывесок:** ${map.signs.length} · **кластеров:** ${clusters.length} · **персонажей:** ${actors.length} ·
+**Вывесок:** ${map.signs.length} · **кластеров:** ${clusters.length} · **персонажей:** ${actors.length} · **живых НПС:** ${cast.length} ·
 **телепортов:** ${teleports.length} · **огней:** ${firePoints.length}
 
 ## Как считалась связанность
@@ -253,6 +264,19 @@ const doc = `# Карта и связанность моделей
 | id | вывесок | X | Z | персонажи |
 |---|---|---|---|---|
 ${table}
+
+## Живые НПС
+
+${(() => {
+  const byName = new Map();
+  for (const c of cast) byName.set(c.name, (byName.get(c.name) ?? 0) + 1);
+  const rows = [...byName.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 16)
+    .map(([name, n]) => `| ${name} | ${n} | \`${cast.find((c) => c.name === name)?.cluster ?? '—'}\` |`)
+    .join('\n');
+  return `| имя | штук | ближайший кластер |\n|---|---|---|\n${rows}`;
+})()}
 
 ## Телепорты карты
 

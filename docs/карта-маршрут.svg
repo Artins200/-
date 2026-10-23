@@ -1,0 +1,499 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="331" viewBox="0 0 1400 331" font-family="ui-sans-serif, system-ui, sans-serif">
+<rect width="1400" height="331" fill="#0b0e16"/>
+<text x="90" y="44" fill="#e8ecf6" font-size="26" font-weight="600">Маршрут сюжета по карте neirogh.rbxl</text>
+<text x="90" y="68" fill="#8b93a7" font-size="14">95 сцен · 4 акта · 9 кластеров · 362 живых НПС · вид сверху, X влево</text>
+<circle cx="338.4" cy="92.5" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="338.4" y="96.5" fill="#5d6884" font-size="11" text-anchor="middle">z0_c0</text>
+<circle cx="702.5" cy="92.5" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="702.5" y="96.5" fill="#5d6884" font-size="11" text-anchor="middle">z0_c1</text>
+<circle cx="1021.8" cy="92.4" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="1021.8" y="96.4" fill="#5d6884" font-size="11" text-anchor="middle">z0_c2</text>
+<circle cx="1288.0" cy="90.9" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="1288.0" y="94.9" fill="#5d6884" font-size="11" text-anchor="middle">z0_c3</text>
+<circle cx="281.2" cy="148.9" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="281.2" y="152.9" fill="#5d6884" font-size="11" text-anchor="middle">z1_c4</text>
+<circle cx="220.7" cy="196.0" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="220.7" y="200.0" fill="#5d6884" font-size="11" text-anchor="middle">z2_c5</text>
+<circle cx="148.7" cy="203.1" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="148.7" y="207.1" fill="#5d6884" font-size="11" text-anchor="middle">z3_c6</text>
+<circle cx="157.9" cy="238.2" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="157.9" y="242.2" fill="#5d6884" font-size="11" text-anchor="middle">z4_c7</text>
+<circle cx="285.0" cy="235.7" r="46" fill="#151b29" stroke="#232c40"/>
+<text x="285.0" y="239.7" fill="#5d6884" font-size="11" text-anchor="middle">z4_c8</text>
+<path d="M88.8 237.5h6M91.8 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M88.8 202.4h6M91.8 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M98.3 91.7h6M101.3 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M189.8 238.4h6M192.8 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M198.9 238.4h6M201.9 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M208.2 238.4h6M211.2 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M217.4 238.4h6M220.4 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M226.6 238.4h6M229.6 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M235.8 238.4h6M238.8 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M245.1 238.4h6M248.1 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M254.3 238.4h6M257.3 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M263.6 238.4h6M266.6 235.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M275.3 238.2h6M278.3 235.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M285.8 236.5h6M288.8 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M165.9 94.9h6M168.9 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M185.1 94.9h6M188.1 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M204.4 94.9h6M207.4 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M223.5 94.9h6M226.5 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M242.8 94.9h6M245.8 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M262.0 94.9h6M265.0 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M281.1 94.9h6M284.1 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M300.3 94.9h6M303.3 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M319.5 94.9h6M322.5 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M338.7 94.9h6M341.7 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M357.9 94.9h6M360.9 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M98.1 237.5h6M101.1 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M107.2 237.5h6M110.2 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M117.0 237.5h6M120.0 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M116.5 237.5h6M119.5 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M125.7 237.5h6M128.7 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M135.0 237.5h6M138.0 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M144.2 237.5h6M147.2 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M154.3 236.7h6M157.3 233.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M144.2 202.4h6M147.2 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M98.1 202.4h6M101.1 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M107.2 202.4h6M110.2 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M117.0 202.4h6M120.0 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M116.5 202.4h6M119.5 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M125.7 202.4h6M128.7 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M135.0 202.4h6M138.0 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M153.4 202.4h6M156.4 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M162.6 202.4h6M165.6 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M171.8 202.4h6M174.8 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M181.0 202.4h6M184.0 199.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M192.4 201.8h6M195.4 198.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M366.1 148.4h6M369.1 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M354.8 92.2h6M357.8 89.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M410.6 91.5h6M413.6 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M426.8 91.5h6M429.8 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M439.9 91.5h6M442.9 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M459.1 91.5h6M462.1 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M477.3 91.5h6M480.3 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M496.5 91.5h6M499.5 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M516.1 91.8h6M519.1 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M535.1 91.8h6M538.1 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M554.9 91.6h6M557.9 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M574.0 91.6h6M577.0 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M594.5 91.8h6M597.5 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M613.9 91.8h6M616.9 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M631.7 91.0h6M634.7 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M650.1 92.3h6M653.1 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M667.8 93.6h6M670.8 90.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M687.0 95.0h6M690.0 92.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M706.2 94.6h6M709.2 91.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M725.5 94.7h6M728.5 91.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M744.8 94.7h6M747.8 91.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M764.0 93.2h6M767.0 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M783.3 93.2h6M786.3 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M802.6 93.2h6M805.6 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M821.8 93.2h6M824.8 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M841.0 93.2h6M844.0 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M860.1 93.2h6M863.1 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M879.3 93.2h6M882.3 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M898.4 93.2h6M901.4 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M917.7 93.2h6M920.7 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M937.0 93.2h6M940.0 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M956.2 93.2h6M959.2 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M975.4 93.2h6M978.4 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M994.6 93.2h6M997.6 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1013.9 93.2h6M1016.9 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1033.2 93.2h6M1036.2 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1052.3 93.2h6M1055.3 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1071.5 93.2h6M1074.5 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1090.7 93.2h6M1093.7 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1110.1 93.2h6M1113.1 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1129.3 93.2h6M1132.3 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M164.4 205.4h6M167.4 202.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M182.4 205.3h6M185.4 202.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M299.3 147.0h6M302.3 144.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M314.5 147.5h6M317.5 144.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M334.3 147.5h6M337.3 144.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M354.0 147.5h6M357.0 144.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M373.7 147.5h6M376.7 144.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M90.6 91.8h6M93.6 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M109.9 91.8h6M112.9 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M129.0 91.8h6M132.0 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M165.2 90.8h6M168.2 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M223.6 91.3h6M226.6 88.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M184.8 90.8h6M187.8 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M204.2 90.8h6M207.2 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M243.1 90.6h6M246.1 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M262.4 90.6h6M265.4 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M281.5 90.6h6M284.5 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M300.7 90.6h6M303.7 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M319.9 90.6h6M322.9 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M339.1 90.6h6M342.1 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M358.3 90.6h6M361.3 87.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M541.8 91.7h6M544.8 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M558.6 91.7h6M561.6 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M577.7 91.7h6M580.7 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M596.8 91.7h6M599.8 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M617.0 91.7h6M620.0 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M636.1 91.6h6M639.1 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M655.3 91.6h6M658.3 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M673.3 90.8h6M676.3 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M691.0 90.8h6M694.0 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M710.6 93.3h6M713.6 90.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M731.7 94.8h6M734.7 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M751.0 94.8h6M754.0 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M770.2 94.8h6M773.2 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M789.5 94.8h6M792.5 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M808.8 94.8h6M811.8 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M828.0 94.8h6M831.0 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M847.2 94.8h6M850.2 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M866.3 94.8h6M869.3 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M885.5 94.8h6M888.5 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M904.6 94.8h6M907.6 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M923.9 94.8h6M926.9 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M943.2 94.8h6M946.2 91.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M963.1 92.6h6M966.1 89.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M981.9 90.5h6M984.9 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1001.1 90.5h6M1004.1 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1020.5 90.5h6M1023.5 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1039.7 90.5h6M1042.7 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M191.9 240.5h6M194.9 237.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M201.1 240.5h6M204.1 237.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M209.8 237.2h6M212.8 234.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M219.4 237.4h6M222.4 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M230.2 237.4h6M233.2 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M239.4 237.4h6M242.4 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M248.7 237.4h6M251.7 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M257.9 237.4h6M260.9 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M267.2 237.4h6M270.2 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M275.4 236.9h6M278.4 233.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M283.4 236.6h6M286.4 233.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M250.1 91.6h6M253.1 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M269.4 91.6h6M272.4 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M288.5 95.7h6M291.5 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M307.7 95.7h6M310.7 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M326.9 95.7h6M329.9 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M346.1 95.7h6M349.1 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M365.3 95.7h6M368.3 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M870.3 92.0h6M873.3 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M889.5 92.0h6M892.5 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M905.1 92.0h6M908.1 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M921.4 91.2h6M924.4 88.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M940.6 91.2h6M943.6 88.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M960.6 91.4h6M963.6 88.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M979.8 91.1h6M982.8 88.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M999.0 91.1h6M1002.0 88.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1019.6 90.7h6M1022.6 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1038.8 90.7h6M1041.8 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1057.8 90.8h6M1060.8 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1077.0 90.8h6M1080.0 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1095.0 90.5h6M1098.0 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1114.4 90.5h6M1117.4 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1132.9 90.8h6M1135.9 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1152.0 91.0h6M1155.0 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1172.3 91.2h6M1175.3 88.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1191.3 91.7h6M1194.3 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1210.4 91.7h6M1213.4 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1230.1 91.9h6M1233.1 88.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1248.7 91.8h6M1251.7 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1268.3 91.8h6M1271.3 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1287.6 91.8h6M1290.6 88.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1307.0 90.2h6M1310.0 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M220.1 92.4h6M223.1 89.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M240.5 92.1h6M243.5 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M259.8 92.1h6M262.8 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M278.8 92.1h6M281.8 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M298.0 92.1h6M301.0 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M317.2 92.1h6M320.2 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M336.4 92.1h6M339.4 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M355.6 92.1h6M358.6 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M278.8 148.2h6M281.8 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M292.6 148.2h6M295.6 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M312.4 148.2h6M315.4 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M331.9 148.2h6M334.9 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M351.6 148.2h6M354.6 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M371.3 148.2h6M374.3 145.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M250.0 92.9h6M253.0 89.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M269.3 92.9h6M272.3 89.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M284.8 92.3h6M287.8 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M304.9 92.3h6M307.9 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M324.1 92.3h6M327.1 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M345.2 93.2h6M348.2 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M364.4 95.7h6M367.4 92.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M166.8 94.9h6M169.8 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M186.0 94.9h6M189.0 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M205.2 94.9h6M208.2 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M224.4 94.9h6M227.4 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M243.6 94.9h6M246.6 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M262.9 94.9h6M265.9 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M282.0 94.9h6M285.0 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M301.2 94.9h6M304.2 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M320.3 94.9h6M323.3 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M339.6 94.9h6M342.6 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M358.7 94.9h6M361.7 91.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M93.2 236.8h6M96.2 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M102.4 236.8h6M105.4 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M111.6 236.8h6M114.6 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M121.1 237.4h6M124.1 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M130.3 237.4h6M133.3 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M139.6 237.4h6M142.6 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M148.8 237.4h6M151.8 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M157.9 237.4h6M160.9 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M167.1 237.4h6M170.1 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M176.3 237.4h6M179.3 234.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M277.6 236.8h6M280.6 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M284.7 236.7h6M287.7 233.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M148.8 202.2h6M151.8 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M102.4 201.7h6M105.4 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M93.2 201.7h6M96.2 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M111.6 201.7h6M114.6 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M121.1 202.2h6M124.1 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M130.3 202.2h6M133.3 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M139.6 202.2h6M142.6 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M158.0 202.2h6M161.0 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M167.2 202.2h6M170.2 199.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M136.4 241.4h6M139.4 238.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M149.4 237.0h6M152.4 234.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M158.5 237.0h6M161.5 234.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M165.4 237.0h6M168.4 234.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M174.1 237.0h6M177.1 234.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M183.3 237.0h6M186.3 234.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M149.4 201.9h6M152.4 198.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M159.6 201.9h6M162.6 198.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M169.2 201.9h6M172.2 198.9v6" stroke="#38425a" stroke-width="1"/>
+<path d="M176.2 202.0h6M179.2 199.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M185.5 202.6h6M188.5 199.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M193.4 201.7h6M196.4 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M89.1 237.5h6M92.1 234.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M89.1 202.3h6M92.1 199.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M182.8 205.4h6M185.8 202.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M98.1 236.5h6M101.1 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M107.3 236.5h6M110.3 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M116.5 236.5h6M119.5 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M128.3 237.1h6M131.3 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M147.6 236.8h6M150.6 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M116.9 236.5h6M119.9 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M154.9 236.5h6M157.9 233.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M147.6 201.7h6M150.6 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M98.1 201.4h6M101.1 198.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M107.3 201.4h6M110.3 198.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M116.5 201.4h6M119.5 198.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M128.3 202.0h6M131.3 199.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M156.3 201.7h6M159.3 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M164.0 201.7h6M167.0 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M173.0 201.8h6M176.0 198.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M182.2 201.8h6M185.2 198.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M191.4 201.8h6M194.4 198.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M139.3 236.8h6M142.3 233.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M139.3 201.7h6M142.3 198.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M87.0 148.6h6M90.0 145.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M108.2 148.6h6M111.2 145.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M130.2 148.4h6M133.2 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M149.1 148.4h6M152.1 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M170.2 148.4h6M173.2 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M186.0 148.4h6M189.0 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M206.3 148.4h6M209.3 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M225.6 148.4h6M228.6 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M246.4 148.4h6M249.4 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M266.3 148.4h6M269.3 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M291.0 148.4h6M294.0 145.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M312.2 146.8h6M315.2 143.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M331.9 146.8h6M334.9 143.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M351.6 146.8h6M354.6 143.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M117.5 91.7h6M120.5 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M136.7 91.7h6M139.7 88.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M169.9 91.0h6M172.9 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M224.9 91.4h6M227.9 88.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M186.7 91.0h6M189.7 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M205.3 91.0h6M208.3 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M243.7 92.1h6M246.7 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M263.0 92.1h6M266.0 89.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M282.8 92.3h6M285.8 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M302.0 92.3h6M305.0 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M321.2 92.3h6M324.2 89.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M339.5 92.2h6M342.5 89.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M358.7 92.2h6M361.7 89.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M394.9 92.0h6M397.9 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M417.7 92.0h6M420.7 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M438.0 92.0h6M441.0 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M457.2 92.0h6M460.2 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M476.4 91.6h6M479.4 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M495.6 91.6h6M498.6 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M514.7 91.6h6M517.7 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M533.2 91.6h6M536.2 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M552.5 91.6h6M555.5 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M571.6 91.6h6M574.6 88.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M589.5 91.5h6M592.5 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M611.5 91.5h6M614.5 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M630.6 91.5h6M633.6 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M649.1 91.5h6M652.1 88.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M668.5 91.2h6M671.5 88.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M687.0 91.3h6M690.0 88.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M706.5 91.3h6M709.5 88.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M726.1 92.0h6M729.1 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M745.5 92.0h6M748.5 89.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M765.5 92.6h6M768.5 89.6v6" stroke="#38425a" stroke-width="1"/>
+<path d="M784.5 90.5h6M787.5 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M803.7 90.5h6M806.7 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M823.0 90.5h6M826.0 87.5v6" stroke="#38425a" stroke-width="1"/>
+<path d="M841.9 90.7h6M844.9 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M861.1 90.7h6M864.1 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M880.0 91.1h6M883.0 88.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M899.1 91.1h6M902.1 88.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M918.4 91.1h6M921.4 88.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M937.2 91.0h6M940.2 88.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M955.6 90.8h6M958.6 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M975.9 90.4h6M978.9 87.4v6" stroke="#38425a" stroke-width="1"/>
+<path d="M995.7 90.3h6M998.7 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1015.1 90.3h6M1018.1 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1034.3 90.3h6M1037.3 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1053.5 90.3h6M1056.5 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1072.7 90.3h6M1075.7 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1091.8 90.3h6M1094.8 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1111.2 90.3h6M1114.2 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1130.4 90.3h6M1133.4 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1149.9 90.2h6M1152.9 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1169.2 90.2h6M1172.2 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1188.4 90.2h6M1191.4 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1207.5 90.2h6M1210.5 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1227.0 90.0h6M1230.0 87.0v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1245.8 90.2h6M1248.8 87.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1265.8 90.3h6M1268.8 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1285.1 90.3h6M1288.1 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1304.6 90.3h6M1307.6 87.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M185.7 237.1h6M188.7 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M195.0 237.1h6M198.0 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M204.1 237.1h6M207.1 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M213.4 237.1h6M216.4 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M222.5 237.1h6M225.5 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M231.8 237.1h6M234.8 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M241.0 237.1h6M244.0 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M250.3 237.1h6M253.3 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M260.3 237.1h6M263.3 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M269.6 237.1h6M272.6 234.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1060.3 90.8h6M1063.3 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1079.5 90.8h6M1082.5 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1089.5 90.8h6M1092.5 87.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1108.8 90.7h6M1111.8 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1129.5 90.7h6M1132.5 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1147.8 90.7h6M1150.8 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1167.1 90.7h6M1170.1 87.7v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1188.0 93.8h6M1191.0 90.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1207.2 93.8h6M1210.2 90.8v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1226.1 93.1h6M1229.1 90.1v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1245.0 93.3h6M1248.0 90.3v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1266.0 93.2h6M1269.0 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1285.2 93.2h6M1288.2 90.2v6" stroke="#38425a" stroke-width="1"/>
+<path d="M1305.8 90.4h6M1308.8 87.4v6" stroke="#38425a" stroke-width="1"/>
+<line x1="90.4" y1="229.7" x2="148.7" y2="203.1" stroke="#2b3446" stroke-width="2"/>
+<line x1="148.7" y1="203.1" x2="281.2" y2="148.9" stroke="#2b3446" stroke-width="2"/>
+<line x1="281.2" y1="148.9" x2="338.4" y2="92.5" stroke="#2b3446" stroke-width="2"/>
+<line x1="338.4" y1="92.5" x2="1021.8" y2="92.4" stroke="#2b3446" stroke-width="2"/>
+<line x1="1021.8" y1="92.4" x2="1288.0" y2="90.9" stroke="#2b3446" stroke-width="2"/>
+<line x1="1288.0" y1="90.9" x2="285.0" y2="235.7" stroke="#2b3446" stroke-width="2"/>
+<line x1="285.0" y1="235.7" x2="157.9" y2="238.2" stroke="#2b3446" stroke-width="2"/>
+<circle cx="90.4" cy="229.7" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>start — Шаттл «Кайрос». 06:12</title></circle>
+<circle cx="93.0" cy="228.5" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>hull — Внешняя обшивка</title></circle>
+<circle cx="95.7" cy="227.3" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>airlock — Шлюз №3</title></circle>
+<circle cx="98.3" cy="226.1" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>hello — Шлюз №3</title></circle>
+<circle cx="101.0" cy="224.9" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>hub — Центральный узел</title></circle>
+<circle cx="103.6" cy="223.6" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>quarters — Жилой блок</title></circle>
+<circle cx="106.3" cy="222.4" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>diary — Жилой блок. Аудиодневник</title></circle>
+<circle cx="108.9" cy="221.2" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>locker — Жилой блок. Шкафчик 9</title></circle>
+<circle cx="111.6" cy="220.0" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>tunnel — Техтоннель</title></circle>
+<circle cx="114.2" cy="218.8" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>lira — Техтоннель. Отсек Лиры</title></circle>
+<circle cx="116.9" cy="217.6" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>lira_truth — Техтоннель. Отсек Лиры</title></circle>
+<circle cx="119.5" cy="216.4" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>first — Техтоннель. Отсек Лиры</title></circle>
+<circle cx="122.2" cy="215.2" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>plan — Техтоннель. Отсек Лиры</title></circle>
+<circle cx="124.8" cy="214.0" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>shaft — Шахта купола</title></circle>
+<circle cx="127.5" cy="212.8" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>twin_voice — Шахта купола. Дно</title></circle>
+<circle cx="130.1" cy="211.5" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>twin_voice2 — Шахта купола. Дно</title></circle>
+<circle cx="132.8" cy="210.3" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>bridge — Рубка</title></circle>
+<circle cx="135.4" cy="209.1" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>kai_truth — Рубка. Разговор с Каем</title></circle>
+<circle cx="138.1" cy="207.9" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>kai_truth2 — Рубка. Разговор с Каем</title></circle>
+<circle cx="140.7" cy="206.7" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>relay — Сигнальное реле</title></circle>
+<circle cx="143.4" cy="205.5" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>notebook — Сигнальное реле. Тетрадь</title></circle>
+<circle cx="146.0" cy="204.3" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>notebook2 — Сигнальное реле. Тетрадь</title></circle>
+<circle cx="148.7" cy="203.1" r="5" fill="#7dd3fc" fill-opacity="0.9"><title>relay_off — Сигнальное реле. Обесточивание</title></circle>
+<circle cx="281.2" cy="148.9" r="5" fill="#a3e635" fill-opacity="0.9"><title>dome — Купол. Вход</title></circle>
+<circle cx="283.2" cy="146.9" r="5" fill="#a3e635" fill-opacity="0.9"><title>sky_crack — Двор. Трещина</title></circle>
+<circle cx="285.1" cy="145.0" r="5" fill="#a3e635" fill-opacity="0.9"><title>schoolyard — Школьный двор. 1 сентября</title></circle>
+<circle cx="287.1" cy="143.0" r="5" fill="#a3e635" fill-opacity="0.9"><title>signs — Коридор первого этажа</title></circle>
+<circle cx="289.1" cy="141.1" r="5" fill="#a3e635" fill-opacity="0.9"><title>gang — Школьный двор. Компания</title></circle>
+<circle cx="291.0" cy="139.2" r="5" fill="#a3e635" fill-opacity="0.9"><title>plan_ignore — Школьный двор</title></circle>
+<circle cx="293.0" cy="137.2" r="5" fill="#a3e635" fill-opacity="0.9"><title>plan_talk — Школьный двор</title></circle>
+<circle cx="295.0" cy="135.3" r="5" fill="#a3e635" fill-opacity="0.9"><title>demid_talk — Школьный двор. Скамейка</title></circle>
+<circle cx="297.0" cy="133.3" r="5" fill="#a3e635" fill-opacity="0.9"><title>demid_talk2 — Школьный двор. Скамейка</title></circle>
+<circle cx="298.9" cy="131.4" r="5" fill="#a3e635" fill-opacity="0.9"><title>vanya_meet — Коридор. Встреча с Ваней</title></circle>
+<circle cx="300.9" cy="129.4" r="5" fill="#a3e635" fill-opacity="0.9"><title>vanya_talk — Коридор. Разговор с Ваней</title></circle>
+<circle cx="302.9" cy="127.5" r="5" fill="#a3e635" fill-opacity="0.9"><title>vanya_memory — Коридор. Память Вани</title></circle>
+<circle cx="304.8" cy="125.6" r="5" fill="#a3e635" fill-opacity="0.9"><title>vanya_fight — Двор. Драка</title></circle>
+<circle cx="306.8" cy="123.6" r="5" fill="#a3e635" fill-opacity="0.9"><title>fight_block — Двор. Драка</title></circle>
+<circle cx="308.8" cy="121.7" r="5" fill="#a3e635" fill-opacity="0.9"><title>fight_hit — Двор. Драка</title></circle>
+<circle cx="310.8" cy="119.7" r="5" fill="#a3e635" fill-opacity="0.9"><title>fight_truth — Двор. Клинч</title></circle>
+<circle cx="312.7" cy="117.8" r="5" fill="#a3e635" fill-opacity="0.9"><title>perfect_form — Спортзал. Перфект-форма</title></circle>
+<circle cx="314.7" cy="115.8" r="5" fill="#a3e635" fill-opacity="0.9"><title>artins_talk — Спортзал. Разговор с копией</title></circle>
+<circle cx="316.7" cy="113.9" r="5" fill="#a3e635" fill-opacity="0.9"><title>artins_anger — Спортзал. Ссора</title></circle>
+<circle cx="318.6" cy="112.0" r="5" fill="#a3e635" fill-opacity="0.9"><title>artins_death — Спортзал. Правда Артинса</title></circle>
+<circle cx="320.6" cy="110.0" r="5" fill="#a3e635" fill-opacity="0.9"><title>artins_clash — Спортзал. Первая схватка</title></circle>
+<circle cx="322.6" cy="108.1" r="5" fill="#a3e635" fill-opacity="0.9"><title>artins_grip — Спортзал. Захват</title></circle>
+<circle cx="324.6" cy="106.1" r="5" fill="#a3e635" fill-opacity="0.9"><title>mama_stop — Спортзал. Вмешательство</title></circle>
+<circle cx="326.5" cy="104.2" r="5" fill="#a3e635" fill-opacity="0.9"><title>mama_answer — Спортзал. Ответ МАМЫ</title></circle>
+<circle cx="328.5" cy="102.3" r="5" fill="#a3e635" fill-opacity="0.9"><title>demid_choice — Спортзал. Демид</title></circle>
+<circle cx="330.5" cy="100.3" r="5" fill="#a3e635" fill-opacity="0.9"><title>chapter_end_2 — Спортзал. Конец первого круга</title></circle>
+<circle cx="332.4" cy="98.4" r="5" fill="#a3e635" fill-opacity="0.9"><title>last_page — Спортзал. Последняя страница</title></circle>
+<circle cx="334.4" cy="96.4" r="5" fill="#a3e635" fill-opacity="0.9"><title>break_loop — Купол. Разрыв круга</title></circle>
+<circle cx="336.4" cy="94.5" r="5" fill="#a3e635" fill-opacity="0.9"><title>lira_call — Купол. Голос снаружи</title></circle>
+<circle cx="338.4" cy="92.5" r="5" fill="#a3e635" fill-opacity="0.9"><title>act2_final — Спортзал. Люк в полу</title></circle>
+<circle cx="1021.8" cy="92.4" r="5" fill="#fbbf24" fill-opacity="0.9"><title>act3_start — Огненный зал. Ступени</title></circle>
+<circle cx="1037.5" cy="92.3" r="5" fill="#fbbf24" fill-opacity="0.9"><title>artins_explain — Огненный зал. Объяснение</title></circle>
+<circle cx="1053.2" cy="92.2" r="5" fill="#fbbf24" fill-opacity="0.9"><title>artins_terms — Огненный зал. Условия</title></circle>
+<circle cx="1068.8" cy="92.1" r="5" fill="#fbbf24" fill-opacity="0.9"><title>mama_terms — Огненный зал. МАМА</title></circle>
+<circle cx="1084.5" cy="92.1" r="5" fill="#fbbf24" fill-opacity="0.9"><title>mama_three — Огненный зал. Три силы</title></circle>
+<circle cx="1100.1" cy="92.0" r="5" fill="#fbbf24" fill-opacity="0.9"><title>nekit_talk — Огненный зал. Наёмники</title></circle>
+<circle cx="1115.8" cy="91.9" r="5" fill="#fbbf24" fill-opacity="0.9"><title>nekit_deal — Огненный зал. Сделка</title></circle>
+<circle cx="1131.4" cy="91.8" r="5" fill="#fbbf24" fill-opacity="0.9"><title>nekit_threat — Огненный зал. Угроза</title></circle>
+<circle cx="1147.1" cy="91.7" r="5" fill="#fbbf24" fill-opacity="0.9"><title>allies — Огненный зал. Сбор</title></circle>
+<circle cx="1162.8" cy="91.6" r="5" fill="#fbbf24" fill-opacity="0.9"><title>battle_plan — Огненный зал. План</title></circle>
+<circle cx="1178.4" cy="91.5" r="5" fill="#fbbf24" fill-opacity="0.9"><title>lira_teleport — Огненный зал. Телепорт</title></circle>
+<circle cx="1194.1" cy="91.5" r="5" fill="#fbbf24" fill-opacity="0.9"><title>war_council — Огненный зал. Военный совет</title></circle>
+<circle cx="1209.7" cy="91.4" r="5" fill="#fbbf24" fill-opacity="0.9"><title>artins_hand — Огненный зал. Рукопожатие</title></circle>
+<circle cx="1225.4" cy="91.3" r="5" fill="#fbbf24" fill-opacity="0.9"><title>act3_final — Огненный зал. Последняя ночь</title></circle>
+<circle cx="1241.1" cy="91.2" r="5" fill="#fbbf24" fill-opacity="0.9"><title>lira_last — Огненный зал. Лира</title></circle>
+<circle cx="1256.7" cy="91.1" r="5" fill="#fbbf24" fill-opacity="0.9"><title>kai_last — Огненный зал. Кай</title></circle>
+<circle cx="1272.4" cy="91.0" r="5" fill="#fbbf24" fill-opacity="0.9"><title>artins_last — Огненный зал. Артинс</title></circle>
+<circle cx="1288.0" cy="90.9" r="5" fill="#fbbf24" fill-opacity="0.9"><title>dawn — Огненный зал. Рассвет</title></circle>
+<circle cx="285.0" cy="235.7" r="5" fill="#f97316" fill-opacity="0.9"><title>ch4_teleport — Арена. Телепорт последнего шанса</title></circle>
+<circle cx="279.4" cy="235.8" r="5" fill="#f97316" fill-opacity="0.9"><title>teleport_refuse — Арена. Телепорт последнего шанса</title></circle>
+<circle cx="273.9" cy="235.9" r="5" fill="#f97316" fill-opacity="0.9"><title>arena_arrival — Зал огня. Центр арены</title></circle>
+<circle cx="268.4" cy="236.0" r="5" fill="#f97316" fill-opacity="0.9"><title>act4_start — Огненный зал. Последний час</title></circle>
+<circle cx="262.9" cy="236.1" r="5" fill="#f97316" fill-opacity="0.9"><title>nekit_first — Арена. Некит</title></circle>
+<circle cx="257.4" cy="236.3" r="5" fill="#f97316" fill-opacity="0.9"><title>nekit_fight — Арена. Некит</title></circle>
+<circle cx="251.8" cy="236.4" r="5" fill="#f97316" fill-opacity="0.9"><title>nekit_shadows — Арена. Тени</title></circle>
+<circle cx="246.3" cy="236.5" r="5" fill="#f97316" fill-opacity="0.9"><title>nekit_memory — Арена. Память Некита</title></circle>
+<circle cx="240.8" cy="236.6" r="5" fill="#f97316" fill-opacity="0.9"><title>vanya_joins — Арена. Ваня</title></circle>
+<circle cx="235.3" cy="236.7" r="5" fill="#f97316" fill-opacity="0.9"><title>demid_joins — Арена. Демид</title></circle>
+<circle cx="229.7" cy="236.8" r="5" fill="#f97316" fill-opacity="0.9"><title>bogdan_turn — Арена. Богдан и Ярик</title></circle>
+<circle cx="224.2" cy="236.9" r="5" fill="#f97316" fill-opacity="0.9"><title>beast_contract — Арена. Контракт</title></circle>
+<circle cx="218.7" cy="237.0" r="5" fill="#f97316" fill-opacity="0.9"><title>karina_fire — Арена. Очаг Карины</title></circle>
+<circle cx="213.2" cy="237.1" r="5" fill="#f97316" fill-opacity="0.9"><title>artins_jealousy — Арена. Ревность</title></circle>
+<circle cx="207.6" cy="237.2" r="5" fill="#f97316" fill-opacity="0.9"><title>artins_rage — Арена. Ярость</title></circle>
+<circle cx="202.1" cy="237.4" r="5" fill="#f97316" fill-opacity="0.9"><title>embrace — Арена. Объятие</title></circle>
+<circle cx="196.6" cy="237.5" r="5" fill="#f97316" fill-opacity="0.9"><title>duel — Арена. Дуэль</title></circle>
+<circle cx="191.1" cy="237.6" r="5" fill="#f97316" fill-opacity="0.9"><title>karina_call — Арена. Карина</title></circle>
+<circle cx="185.5" cy="237.7" r="5" fill="#f97316" fill-opacity="0.9"><title>sacrifice_moment — Арена. Момент</title></circle>
+<circle cx="180.0" cy="237.8" r="5" fill="#f97316" fill-opacity="0.9"><title>mama_ultimatum — Арена. Ультиматум МАМЫ</title></circle>
+<circle cx="174.5" cy="237.9" r="5" fill="#f97316" fill-opacity="0.9"><title>final_choice — Арена. Последний выбор</title></circle>
+<circle cx="169.0" cy="238.0" r="5" fill="#f97316" fill-opacity="0.9"><title>ending_ash — Арена. Пепел</title></circle>
+<circle cx="163.5" cy="238.1" r="5" fill="#f97316" fill-opacity="0.9"><title>ending_shard — Арена. Осколок</title></circle>
+<circle cx="157.9" cy="238.2" r="5" fill="#f97316" fill-opacity="0.9"><title>ending_loop — Арена. Сигнал</title></circle>
+<circle cx="90.4" cy="229.7" r="9" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+<text x="104.4" y="233.7" fill="#7dd3fc" font-size="12">спавн</text>
+<path d="M157.92986917283008 227.24570142687486l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#f97316"/>
+<text x="173.9" y="242.2" fill="#f97316" font-size="12">арена · 50 огней</text>
+<circle cx="90" cy="297" r="5" fill="#7dd3fc"/>
+<text x="102" y="301" fill="#8b93a7" font-size="13">I. Тишина</text>
+<circle cx="340" cy="297" r="5" fill="#a3e635"/>
+<text x="352" y="301" fill="#8b93a7" font-size="13">II. Первого сентября</text>
+<circle cx="590" cy="297" r="5" fill="#fbbf24"/>
+<text x="602" y="301" fill="#8b93a7" font-size="13">III. Сплав</text>
+<circle cx="840" cy="297" r="5" fill="#f97316"/>
+<text x="852" y="301" fill="#8b93a7" font-size="13">IV. Жестокий сплав</text>
+</svg>

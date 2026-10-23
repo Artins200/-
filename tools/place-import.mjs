@@ -55,6 +55,7 @@ const map = {
   spawn: null,
   zones: [],
   actors: [],
+  cast: [],
   teleports: [],
   fires: [],
   signs: [],
@@ -89,6 +90,31 @@ for (const inst of wsChildren) {
   map.actors.push({ name: (inst.name ?? '').trim(), pos: posOf(inst.referent), parts });
 }
 
+// Живые персонажи: каждая модель, в которой есть Humanoid, — это НПС на карте.
+// Имя берём у модели-родителя Humanoid'а, позицию — у HumanoidRootPart.
+const partPos = (ref) => {
+  const cf = dom.instance(ref)?.properties?.CFrame?.CFrame?.position;
+  return cf ? cf.map((v) => +v.toFixed(2)) : null;
+};
+const castSeen = new Map();
+for (const inst of dom.descendants(workspaceRef)) {
+  if (inst.className !== 'Humanoid') continue;
+  const modelRef = dom.instance(inst.referent)?.parent;
+  if (!modelRef) continue;
+  const model = dom.instance(modelRef);
+  if (!model) continue;
+  const kids = dom.children(modelRef).map((r) => dom.instance(r));
+  const root = kids.find((k) => k.name === 'HumanoidRootPart') ?? kids.find((k) => k.className === 'Part');
+  const pos = root ? partPos(root.referent) : null;
+  if (!pos) continue;
+  const name = (model.name ?? '').trim();
+  if (!name || name === 'Room') continue;
+  const key = `${name}@${pos.join(',')}`;
+  if (castSeen.has(key)) continue;
+  castSeen.set(key, { name, pos, health: 100 });
+}
+map.cast = [...castSeen.values()].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+
 // Огонь: Part с именем Fire — их ровно 50 и все в одной полосе.
 for (const d of dom.descendants(workspaceRef)) {
   if (d.className === 'Part' && d.name === 'Fire') {
@@ -112,5 +138,5 @@ fs.writeFileSync(out, JSON.stringify(map, null, 1), 'utf8');
 
 console.log(`  ${map.source}: ${buf.length} Б`);
 console.log(`  спавн: ${JSON.stringify(map.spawn)}`);
-console.log(`  зоны: ${map.zones.length}, персонажи: ${map.actors.length}, телепорты: ${map.teleports.length}, огни: ${map.fires.length}, вывески: ${map.signs.length}`);
+console.log(`  зоны: ${map.zones.length}, модели с Humanoid: ${map.actors.length}, живые НПС: ${map.cast.length}, телепорты: ${map.teleports.length}, огни: ${map.fires.length}, вывески: ${map.signs.length}`);
 console.log(`  → ${out}`);

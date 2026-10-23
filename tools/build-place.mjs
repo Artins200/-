@@ -5,7 +5,7 @@
 //   node tools/build-place.mjs --out x.rbxl
 //
 // Скрипты кладутся туда же, куда их положил бы Rojo:
-//   ReplicatedStorage/Shared/{StoryData,StoryEngine,Cinema,TeleportDirector}
+//   ReplicatedStorage/Shared/{StoryData,StoryEngine,Cinema,TeleportDirector,WorldKit}
 //   ServerScriptService/StoryServer
 //   StarterPlayer/StarterPlayerScripts/StoryClient
 //
@@ -27,6 +27,7 @@ const MODULES = [
 	['StoryEngine', 'ReplicatedStorage/Shared/StoryEngine.lua'],
 	['Cinema', 'ReplicatedStorage/Shared/Cinema.lua'],
 	['TeleportDirector', 'ReplicatedStorage/Shared/TeleportDirector.lua'],
+	['WorldKit', 'ReplicatedStorage/Shared/WorldKit.lua'],
 ];
 const SERVER_SCRIPT = ['StoryServer', 'ServerScriptService/StoryServer.server.lua'];
 const CLIENT_SCRIPT = ['StoryClient', 'StarterPlayer/StarterPlayerScripts/StoryClient.client.lua'];

@@ -1,6 +1,9 @@
 --!nonstrict
--- Клиент визуальной новеллы: рисует сцену, текст с печатной машинкой,
--- выборы, инвентарь и финальный экран. Вся логика — на сервере.
+-- Клиент новеллы, которая идёт по настоящей карте.
+--
+-- Никакого полноэкранного меню: игрок видит мир, идёт к метке, а внизу
+-- появляется реплика очередной сцены. Выборы — компактная строка кнопок,
+-- в бою добавляется «Ударить», в финале — кнопка телепорта.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,26 +20,24 @@ local Choose = remotes:WaitForChild("Choose")
 local Restart = remotes:WaitForChild("Restart")
 local StateChanged = remotes:WaitForChild("StateChanged")
 local Teleport = remotes:WaitForChild("Teleport")
+local Strike = remotes:WaitForChild("Strike")
 
--- Подписи флагов и предметов берём из того же StoryData, что и сервер.
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
 local StoryData = require(sharedFolder:WaitForChild("StoryData"))
 local Cinema = require(sharedFolder:WaitForChild("Cinema"))
 
 local COLORS = {
-	bg = Color3.fromRGB(9, 11, 18),
-	panel = Color3.fromRGB(18, 22, 34),
-	panelAlt = Color3.fromRGB(24, 29, 44),
+	panel = Color3.fromRGB(10, 12, 20),
 	accent = Color3.fromRGB(125, 211, 252),
-	text = Color3.fromRGB(230, 235, 245),
-	muted = Color3.fromRGB(138, 147, 170),
-	locked = Color3.fromRGB(120, 128, 148),
+	text = Color3.fromRGB(232, 236, 246),
+	muted = Color3.fromRGB(140, 148, 172),
+	locked = Color3.fromRGB(112, 120, 140),
 	good = Color3.fromRGB(163, 230, 53),
 	bad = Color3.fromRGB(248, 113, 113),
 	true_ = Color3.fromRGB(251, 191, 36),
+	hot = Color3.fromRGB(249, 115, 22),
 }
 
-local ACT_NAMES = { "Акт I. Тишина", "Акт II. Первого сентября", "Акт III. Сплав", "Глава 4. Сплав огня и ревности" }
 local TYPE_LABEL = { neutral = "НЕЙТРАЛЬНАЯ КОНЦОВКА", bad = "ПЛОХАЯ КОНЦОВКА", ["true"] = "ИСТИННАЯ КОНЦОВКА" }
 local TYPE_COLOR = { neutral = COLORS.accent, bad = COLORS.bad, ["true"] = COLORS.true_ }
 
@@ -55,701 +56,619 @@ local function corner(radius)
 	return new("UICorner", { CornerRadius = UDim.new(0, radius) })
 end
 
+local function text(props)
+	props.BackgroundTransparency = props.BackgroundTransparency or 1
+	props.Font = props.Font or Enum.Font.Gotham
+	return new("TextLabel", props)
+end
+
 --------------------------------------------------------------------------------
--- Каркас интерфейса
+-- Каркас
 --------------------------------------------------------------------------------
 
 local gui = new("ScreenGui", {
-	Name = "StoryGui",
+	Name = "StoryHud",
 	ResetOnSpawn = false,
 	IgnoreGuiInset = true,
 	ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-}, {})
+})
 gui.Parent = playerGui
 
-local root = new("Frame", {
-	Name = "Root",
-	Size = UDim2.fromScale(1, 1),
-	BackgroundColor3 = COLORS.bg,
-	BorderSizePixel = 0,
-}, {
-	new("UIGradient", {
-		Rotation = 90,
-		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(16, 20, 32)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(7, 8, 14)),
-		}),
-	}),
-})
-root.Parent = gui
-
--- Мягкое свечение за панелью
-new("Frame", {
-	Name = "Glow",
-	Size = UDim2.fromScale(0.9, 0.75),
-	Position = UDim2.fromScale(0.5, 0.5),
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	BackgroundColor3 = Color3.fromRGB(56, 89, 130),
-	BackgroundTransparency = 0.93,
-	BorderSizePixel = 0,
-}, { corner(400) }).Parent = root
-
-local layout = new("Frame", {
-	Name = "Layout",
-	Size = UDim2.new(1, -48, 1, -48),
-	Position = UDim2.fromScale(0.5, 0.5),
-	AnchorPoint = Vector2.new(0.5, 0.5),
-	BackgroundTransparency = 1,
-}, {
-	new("UISizeConstraint", { MaxSize = Vector2.new(1180, 760) }),
-	new("UIListLayout", {
-		FillDirection = Enum.FillDirection.Horizontal,
-		Padding = UDim.new(0, 20),
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-	}),
-})
-layout.Parent = root
-
--- Основная панель истории
-local story = new("Frame", {
-	Name = "Story",
-	LayoutOrder = 1,
-	Size = UDim2.new(1, -300, 1, 0),
+-- Верх слева: глава, сцена, здоровье.
+local head = new("Frame", {
+	Name = "Head",
+	Position = UDim2.new(0, 18, 0, 18),
+	Size = UDim2.new(0, 380, 0, 74),
 	BackgroundColor3 = COLORS.panel,
-	BackgroundTransparency = 0.06,
-	BorderSizePixel = 0,
-}, {
-	corner(18),
-	new("UIStroke", { Color = Color3.fromRGB(60, 72, 100), Transparency = 0.5, Thickness = 1 }),
-	new("UIPadding", {
-		PaddingTop = UDim.new(0, 24),
-		PaddingBottom = UDim.new(0, 20),
-		PaddingLeft = UDim.new(0, 30),
-		PaddingRight = UDim.new(0, 30),
-	}),
-	-- Позиции задаются явно: смешивать UIListLayout с scale-размерами
-	-- в панели с прокруткой ненадёжно на разных экранах.
-})
-story.Parent = layout
-
-local actLabel = new("TextLabel", {
-	Name = "Act",
-	LayoutOrder = 1,
-	Position = UDim2.fromOffset(0, 0),
-	Size = UDim2.new(1, 0, 0, 16),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.GothamMedium,
-	TextSize = 13,
-	TextColor3 = COLORS.accent,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	Text = "АКТ I",
-}, {})
-actLabel.Parent = story
-
-local sceneLabel = new("TextLabel", {
-	Name = "Scene",
-	LayoutOrder = 2,
-	Position = UDim2.fromOffset(0, 22),
-	Size = UDim2.new(1, 0, 0, 34),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.GothamBold,
-	TextSize = 26,
-	TextColor3 = COLORS.text,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	Text = "",
-}, {})
-sceneLabel.Parent = story
-
-local speakerLabel = new("TextLabel", {
-	Name = "Speaker",
-	LayoutOrder = 3,
-	Position = UDim2.fromOffset(0, 62),
-	Size = UDim2.new(1, 0, 0, 22),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.GothamBold,
-	TextSize = 16,
-	TextColor3 = COLORS.accent,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	Text = "",
-}, {})
-speakerLabel.Parent = story
-
--- Кадры анимации сцены: моноширинная строка в правом верхнем углу панели.
--- Проигрыватель циклический: когда кадры заканчиваются, он начинает сначала.
-local animLabel = new("TextLabel", {
-	Name = "Animation",
-	Position = UDim2.new(1, -8, 0, 0),
-	Size = UDim2.new(0, 240, 0, 40),
-	AnchorPoint = Vector2.new(1, 0),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.Code,
-	TextSize = 18,
-	TextColor3 = Color3.fromRGB(251, 146, 60),
-	TextXAlignment = Enum.TextXAlignment.Right,
-	TextWrapped = true,
-	Text = "",
-}, {})
-animLabel.Parent = story
-
-local cinema = nil
-RunService.Heartbeat:Connect(function(dt)
-	if not cinema then
-		return
-	end
-	local frames = cinema:advance(math.min(dt, 0.25))
-	local parts = {}
-	for _, frame in ipairs(frames) do
-		table.insert(parts, frame.text or "")
-	end
-	animLabel.Text = table.concat(parts, "   ")
-end)
-
-local bodyScroll = new("ScrollingFrame", {
-	Name = "BodyScroll",
-	LayoutOrder = 4,
-	Position = UDim2.new(0, 0, 0, 92),
-	Size = UDim2.new(1, 0, 0.42, -92),
-	BackgroundTransparency = 1,
-	BorderSizePixel = 0,
-	ScrollBarThickness = 3,
-	ScrollBarImageColor3 = Color3.fromRGB(80, 92, 120),
-	CanvasSize = UDim2.new(0, 0, 0, 0),
-	AutomaticCanvasSize = Enum.AutomaticSize.Y,
-	ScrollingDirection = Enum.ScrollingDirection.Y,
-}, {
-	new("TextLabel", {
-		Name = "Body",
-		Size = UDim2.new(1, -6, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundTransparency = 1,
-		Font = Enum.Font.Gotham,
-		TextSize = 19,
-		LineHeight = 1.35,
-		TextColor3 = COLORS.text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextWrapped = true,
-		RichText = false,
-		Text = "",
-	}, {}),
-})
-bodyScroll.Parent = story
-local bodyLabel = bodyScroll:WaitForChild("Body")
-
--- Тонкая линия-разделитель
-new("Frame", {
-	Name = "Divider",
-	LayoutOrder = 5,
-	Position = UDim2.new(0, 0, 0.42, 0),
-	Size = UDim2.new(1, 0, 0, 1),
-	BackgroundColor3 = Color3.fromRGB(60, 72, 100),
-	BackgroundTransparency = 0.6,
-	BorderSizePixel = 0,
-}, {}).Parent = story
-
-local choicesScroll = new("ScrollingFrame", {
-	Name = "Choices",
-	LayoutOrder = 6,
-	Position = UDim2.new(0, 0, 0.42, 12),
-	Size = UDim2.new(1, 0, 0.58, -12),
-	BackgroundTransparency = 1,
-	BorderSizePixel = 0,
-	ScrollBarThickness = 3,
-	ScrollBarImageColor3 = Color3.fromRGB(80, 92, 120),
-	CanvasSize = UDim2.new(0, 0, 0, 0),
-	AutomaticCanvasSize = Enum.AutomaticSize.Y,
-	ScrollingDirection = Enum.ScrollingDirection.Y,
-}, {
-	new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }),
-})
-choicesScroll.Parent = story
-
--- Боковая панель: что уже найдено
-local side = new("Frame", {
-	Name = "Side",
-	LayoutOrder = 2,
-	Size = UDim2.new(0, 280, 1, 0),
-	BackgroundColor3 = COLORS.panelAlt,
 	BackgroundTransparency = 0.25,
 	BorderSizePixel = 0,
-}, {
-	corner(18),
-	new("UIStroke", { Color = Color3.fromRGB(60, 72, 100), Transparency = 0.6 }),
-	new("UIPadding", {
-		PaddingTop = UDim.new(0, 22),
-		PaddingBottom = UDim.new(0, 18),
-		PaddingLeft = UDim.new(0, 18),
-		PaddingRight = UDim.new(0, 18),
-	}),
-	new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder }),
-})
-side.Parent = layout
+}, { corner(10) })
+head.Parent = gui
 
-new("TextLabel", {
-	LayoutOrder = 1,
-	Size = UDim2.new(1, 0, 0, 20),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.GothamBold,
-	TextSize = 13,
-	TextColor3 = COLORS.muted,
+local actLabel = text({
+	Name = "Act",
+	Position = UDim2.new(0, 12, 0, 8),
+	Size = UDim2.new(1, -24, 0, 16),
+	Text = "",
+	TextSize = 12,
+	TextColor3 = COLORS.accent,
 	TextXAlignment = Enum.TextXAlignment.Left,
-	Text = "ЖУРНАЛ",
-}, {}).Parent = side
-
-local sideContent = new("ScrollingFrame", {
-	LayoutOrder = 2,
-	Size = UDim2.new(1, 0, 1, -170),
-	BackgroundTransparency = 1,
-	BorderSizePixel = 0,
-	ScrollBarThickness = 2,
-	CanvasSize = UDim2.new(0, 0, 0, 0),
-	AutomaticCanvasSize = Enum.AutomaticSize.Y,
-	ScrollingDirection = Enum.ScrollingDirection.Y,
-}, {
-	new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 })
-sideContent.Parent = side
+actLabel.Parent = head
 
-local progressLabel = new("TextLabel", {
-	LayoutOrder = 3,
-	Size = UDim2.new(1, 0, 0, 40),
-	BackgroundTransparency = 1,
-	Font = Enum.Font.GothamMedium,
+local sceneLabel = text({
+	Name = "Scene",
+	Position = UDim2.new(0, 12, 0, 24),
+	Size = UDim2.new(1, -24, 0, 20),
+	Text = "",
+	TextSize = 15,
+	TextColor3 = COLORS.text,
+	TextXAlignment = Enum.TextXAlignment.Left,
+})
+sceneLabel.Parent = head
+
+local hpBar = new("Frame", {
+	Name = "HpBar",
+	Position = UDim2.new(0, 12, 0, 52),
+	Size = UDim2.new(1, -24, 0, 6),
+	BackgroundColor3 = Color3.fromRGB(40, 46, 62),
+	BorderSizePixel = 0,
+}, { corner(3) })
+hpBar.Parent = head
+
+local hpFill = new("Frame", {
+	Name = "Fill",
+	Size = UDim2.new(1, 0, 1, 0),
+	BackgroundColor3 = COLORS.good,
+	BorderSizePixel = 0,
+}, { corner(3) })
+hpFill.Parent = hpBar
+
+-- Верх справа: предметы и прогресс.
+local side = new("Frame", {
+	Name = "Side",
+	Position = UDim2.new(1, -262, 0, 18),
+	Size = UDim2.new(0, 244, 0, 74),
+	BackgroundColor3 = COLORS.panel,
+	BackgroundTransparency = 0.25,
+	BorderSizePixel = 0,
+}, { corner(10) })
+side.Parent = gui
+
+local itemsLabel = text({
+	Name = "Items",
+	Position = UDim2.new(0, 12, 0, 8),
+	Size = UDim2.new(1, -24, 0, 34),
+	Text = "Инвентарь пуст",
 	TextSize = 12,
 	TextColor3 = COLORS.muted,
 	TextWrapped = true,
 	TextXAlignment = Enum.TextXAlignment.Left,
-	TextYAlignment = Enum.TextYAlignment.Bottom,
+	TextYAlignment = Enum.TextYAlignment.Top,
+})
+itemsLabel.Parent = side
+
+local progressLabel = text({
+	Name = "Progress",
+	Position = UDim2.new(0, 12, 0, 46),
+	Size = UDim2.new(1, -24, 0, 20),
 	Text = "",
-}, {})
+	TextSize = 12,
+	TextColor3 = COLORS.muted,
+	TextXAlignment = Enum.TextXAlignment.Left,
+})
 progressLabel.Parent = side
 
-local restartButton = new("TextButton", {
-	LayoutOrder = 4,
-	Size = UDim2.new(1, 0, 0, 36),
-	BackgroundColor3 = Color3.fromRGB(40, 48, 68),
+-- Правый низ: кадры анимации сцены.
+local animLabel = text({
+	Name = "Anim",
+	Position = UDim2.new(1, -262, 1, -196),
+	Size = UDim2.new(0, 244, 0, 40),
+	Text = "",
+	TextSize = 12,
+	Font = Enum.Font.Code,
+	TextColor3 = COLORS.hot,
+	TextXAlignment = Enum.TextXAlignment.Right,
+	TextYAlignment = Enum.TextYAlignment.Bottom,
+	TextWrapped = true,
+})
+animLabel.Parent = gui
+
+-- Низ: реплика и выборы.
+local panel = new("Frame", {
+	Name = "Panel",
+	Position = UDim2.new(0.5, 0, 1, -176),
+	AnchorPoint = Vector2.new(0.5, 1),
+	Size = UDim2.new(1, -36, 0, 160),
+	BackgroundColor3 = COLORS.panel,
+	BackgroundTransparency = 0.18,
 	BorderSizePixel = 0,
-	AutoButtonColor = true,
-	Font = Enum.Font.GothamMedium,
-	TextSize = 13,
+}, { corner(14) })
+panel.Parent = gui
+
+local speakerLabel = text({
+	Name = "Speaker",
+	Position = UDim2.new(0, 20, 0, 12),
+	Size = UDim2.new(1, -40, 0, 18),
+	Text = "",
+	TextSize = 14,
+	TextColor3 = COLORS.accent,
+	TextXAlignment = Enum.TextXAlignment.Left,
+})
+speakerLabel.Parent = panel
+
+local bodyLabel = text({
+	Name = "Body",
+	Position = UDim2.new(0, 20, 0, 34),
+	Size = UDim2.new(1, -40, 0, 74),
+	Text = "",
+	TextSize = 15,
+	TextColor3 = COLORS.text,
+	TextWrapped = true,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextYAlignment = Enum.TextYAlignment.Top,
+})
+bodyLabel.Parent = panel
+
+local hintLabel = text({
+	Name = "Hint",
+	Position = UDim2.new(0, 20, 0, 112),
+	Size = UDim2.new(1, -40, 0, 16),
+	Text = "",
+	TextSize = 12,
 	TextColor3 = COLORS.muted,
-	Text = "Начать заново",
-}, { corner(8) })
-restartButton.Parent = side
+	TextXAlignment = Enum.TextXAlignment.Left,
+})
+hintLabel.Parent = panel
 
---------------------------------------------------------------------------------
--- Экран концовки
---------------------------------------------------------------------------------
-
-local endInner = new("Frame", {
-	Size = UDim2.new(1, -48, 1, -48),
-	Position = UDim2.fromScale(0.5, 0.5),
-	AnchorPoint = Vector2.new(0.5, 0.5),
+local choicesBox = new("Frame", {
+	Name = "Choices",
+	Position = UDim2.new(0, 20, 0, 130),
+	Size = UDim2.new(1, -40, 0, 26),
 	BackgroundTransparency = 1,
 }, {
-	new("UISizeConstraint", { MaxSize = Vector2.new(720, 620) }),
 	new("UIListLayout", {
-		Padding = UDim.new(0, 16),
-		HorizontalAlignment = Enum.HorizontalAlignment.Center,
-		VerticalAlignment = Enum.VerticalAlignment.Center,
+		FillDirection = Enum.FillDirection.Horizontal,
+		Padding = UDim.new(0, 8),
+		VerticalAlignment = Enum.VerticalAlignment.Top,
 	}),
-	new("TextLabel", {
-		Name = "Kind",
-		Size = UDim2.new(1, 0, 0, 18),
-		BackgroundTransparency = 1,
-		Font = Enum.Font.GothamBold,
-		TextSize = 13,
-		TextColor3 = COLORS.accent,
-		Text = "",
-	}),
-	new("TextLabel", {
-		Name = "Title",
-		Size = UDim2.new(1, 0, 0, 64),
-		BackgroundTransparency = 1,
-		Font = Enum.Font.GothamBold,
-		TextSize = 52,
-		TextColor3 = COLORS.text,
-		Text = "",
-	}),
-	new("TextLabel", {
-		Name = "Summary",
-		Size = UDim2.new(1, 0, 0, 24),
-		BackgroundTransparency = 1,
-		Font = Enum.Font.GothamMedium,
-		TextSize = 15,
-		TextColor3 = COLORS.muted,
-		Text = "",
-	}),
-	new("TextLabel", {
-		Name = "Text",
-		Size = UDim2.new(1, 0, 0, 236),
-		BackgroundTransparency = 1,
-		Font = Enum.Font.Gotham,
-		TextSize = 18,
-		LineHeight = 1.35,
-		TextColor3 = COLORS.text,
-		TextWrapped = true,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		Text = "",
-	}),
-	new("TextButton", {
-		Name = "Again",
-		Size = UDim2.new(0, 220, 0, 44),
-		BackgroundColor3 = COLORS.accent,
-		BorderSizePixel = 0,
-		Font = Enum.Font.GothamBold,
-		TextSize = 14,
-		TextColor3 = Color3.fromRGB(9, 11, 18),
-		Text = "Пройти заново",
-		AutoButtonColor = true,
-	}, { corner(10) }),
 })
+choicesBox.Parent = panel
 
-local endScreen = new("Frame", {
-	Name = "EndScreen",
-	Size = UDim2.fromScale(1, 1),
-	BackgroundColor3 = Color3.fromRGB(5, 6, 10),
-	BackgroundTransparency = 1,
-	Visible = false,
-	BorderSizePixel = 0,
-}, { endInner })
-endScreen.Parent = root
-local endKind = endInner:FindFirstChild("Kind")
-local endTitle = endInner:FindFirstChild("Title")
-local endSummary = endInner:FindFirstChild("Summary")
-local endText = endInner:FindFirstChild("Text")
-local endAgain = endInner:FindFirstChild("Again")
-
--- Адаптив: на узком экране прячем журнал
-local function adapt()
-	local width = root.AbsoluteSize.X
-	local showSide = width >= 900
-	side.Visible = showSide
-	story.Size = if showSide then UDim2.new(1, -300, 1, 0) else UDim2.new(1, 0, 1, 0)
-end
-root:GetPropertyChangedSignal("AbsoluteSize"):Connect(adapt)
-adapt()
-
---------------------------------------------------------------------------------
--- Состояние и рендер
---------------------------------------------------------------------------------
-
-local view = nil
-local typewriterToken = 0
-local busy = false
-
-local function clear(frame)
-	for _, child in ipairs(frame:GetChildren()) do
-		if child:IsA("GuiObject") and not child:IsA("UIListLayout") and not child:IsA("UIPadding") then
+local function clearChoices()
+	for _, child in ipairs(choicesBox:GetChildren()) do
+		if child:IsA("TextButton") then
 			child:Destroy()
 		end
 	end
 end
 
-local function setBodyText(text, instant)
-	typewriterToken += 1
-	local token = typewriterToken
-	bodyLabel.Text = ""
-	if instant or #text < 8 then
-		bodyLabel.Text = text
-		busy = false
+-- Кнопка телепорта: только когда сцена его предлагает.
+local teleportButton = new("TextButton", {
+	Name = "Teleport",
+	AnchorPoint = Vector2.new(0.5, 1),
+	Position = UDim2.new(0.5, 0, 1, -190),
+	Size = UDim2.new(0, 300, 0, 44),
+	BackgroundColor3 = COLORS.hot,
+	BorderSizePixel = 0,
+	Text = "ШАГНУТЬ В ОГОНЬ",
+	Font = Enum.Font.GothamBold,
+	TextSize = 15,
+	TextColor3 = Color3.fromRGB(20, 12, 4),
+	AutoButtonColor = true,
+	Visible = false,
+}, { corner(10) })
+teleportButton.Parent = gui
+
+-- Кнопка удара: только в драке.
+local strikeButton = new("TextButton", {
+	Name = "Strike",
+	AnchorPoint = Vector2.new(1, 1),
+	Position = UDim2.new(1, -24, 1, -190),
+	Size = UDim2.new(0, 132, 0, 40),
+	BackgroundColor3 = Color3.fromRGB(120, 30, 30),
+	BorderSizePixel = 0,
+	Text = "УДАРИТЬ",
+	Font = Enum.Font.GothamBold,
+	TextSize = 13,
+	TextColor3 = Color3.fromRGB(255, 220, 220),
+	Visible = false,
+}, { corner(9) })
+strikeButton.Parent = gui
+
+-- Экран концовки.
+local ending = new("Frame", {
+	Name = "Ending",
+	Size = UDim2.new(1, 0, 1, 0),
+	BackgroundColor3 = COLORS.panel,
+	BackgroundTransparency = 0.06,
+	BorderSizePixel = 0,
+	Visible = false,
+}, {})
+ending.Parent = gui
+
+local endKind = text({
+	Position = UDim2.new(0.5, 0, 0, 96),
+	AnchorPoint = Vector2.new(0.5, 0),
+	Size = UDim2.new(0, 720, 0, 18),
+	Text = "",
+	TextSize = 12,
+	TextXAlignment = Enum.TextXAlignment.Center,
+})
+endKind.Parent = ending
+
+local endTitle = text({
+	Position = UDim2.new(0.5, 0, 0, 122),
+	AnchorPoint = Vector2.new(0.5, 0),
+	Size = UDim2.new(0, 720, 0, 44),
+	Text = "",
+	TextSize = 32,
+	Font = Enum.Font.GothamBold,
+	TextColor3 = COLORS.text,
+	TextXAlignment = Enum.TextXAlignment.Center,
+})
+endTitle.Parent = ending
+
+local endSummary = text({
+	Position = UDim2.new(0.5, 0, 0, 176),
+	AnchorPoint = Vector2.new(0.5, 0),
+	Size = UDim2.new(0, 700, 0, 20),
+	Text = "",
+	TextSize = 14,
+	TextColor3 = COLORS.muted,
+	TextXAlignment = Enum.TextXAlignment.Center,
+})
+endSummary.Parent = ending
+
+local endText = text({
+	Position = UDim2.new(0.5, 0, 0, 210),
+	AnchorPoint = Vector2.new(0.5, 0),
+	Size = UDim2.new(0, 720, 0, 210),
+	Text = "",
+	TextSize = 15,
+	TextColor3 = COLORS.text,
+	TextWrapped = true,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextYAlignment = Enum.TextYAlignment.Top,
+})
+endText.Parent = ending
+
+local againButton = new("TextButton", {
+	Position = UDim2.new(0.5, -110, 0, 440),
+	Size = UDim2.new(0, 220, 0, 44),
+	BackgroundColor3 = COLORS.accent,
+	BorderSizePixel = 0,
+	Text = "Пройти заново",
+	Font = Enum.Font.GothamBold,
+	TextSize = 15,
+	TextColor3 = Color3.fromRGB(6, 12, 20),
+}, { corner(10) })
+againButton.Parent = ending
+
+--------------------------------------------------------------------------------
+-- Метка в мире
+--------------------------------------------------------------------------------
+
+local marker = new("BillboardGui", {
+	Name = "StoryMarker",
+	Size = UDim2.new(0, 320, 0, 90),
+	AlwaysOnTop = true,
+	MaxDistance = 600,
+	Enabled = false,
+})
+marker.Parent = playerGui
+
+local markerArrow = text({
+	Position = UDim2.new(0, 0, 0, 0),
+	Size = UDim2.new(1, 0, 0, 48),
+	Text = "▼",
+	TextSize = 44,
+	TextColor3 = COLORS.accent,
+	TextXAlignment = Enum.TextXAlignment.Center,
+})
+markerArrow.Parent = marker
+
+local markerLabel = text({
+	Position = UDim2.new(0, 0, 0, 44),
+	Size = UDim2.new(1, 0, 0, 20),
+	Text = "",
+	TextSize = 13,
+	TextColor3 = COLORS.text,
+	TextXAlignment = Enum.TextXAlignment.Center,
+})
+markerLabel.Parent = marker
+
+local markerAnchor = new("Part", {
+	Name = "StoryMarkerAnchor",
+	Anchored = true,
+	CanCollide = false,
+	CanQuery = false,
+	CanTouch = false,
+	Transparency = 1,
+	Size = Vector3.new(2, 2, 2),
+	Parent = workspace,
+})
+marker.Adornee = markerAnchor
+
+local beam = new("Part", {
+	Name = "StoryBeam",
+	Anchored = true,
+	CanCollide = false,
+	CanQuery = false,
+	CanTouch = false,
+	Transparency = 0.55,
+	Material = Enum.Material.Neon,
+	Color = COLORS.accent,
+	Size = Vector3.new(1.2, 40, 1.2),
+	Parent = workspace,
+})
+local beamPoint = new("PointLight", {
+	Brightness = 4,
+	Range = 30,
+	Color = COLORS.accent,
+	Parent = beam,
+})
+
+--------------------------------------------------------------------------------
+-- Состояние
+--------------------------------------------------------------------------------
+
+local state = {
+	view = nil,
+	cinema = nil,
+	animIndex = 0,
+	typing = nil,
+	fullText = "",
+}
+
+local function setMarker(world)
+	if not world or not world.pos then
+		marker.Enabled = false
+		beam.Transparency = 1
+		beamPoint.Enabled = false
 		return
 	end
-	busy = true
-	task.spawn(function()
-		for i = 1, #text do
-			if token ~= typewriterToken then
-				return
-			end
-			bodyLabel.Text = text:sub(1, i)
-			if i % 2 == 0 then
-				task.wait(0.012)
+	local target = Vector3.new(world.pos[1], world.pos[2], world.pos[3])
+	markerAnchor.Position = target
+	marker.Enabled = true
+	beam.Position = target + Vector3.new(0, 20, 0)
+	beam.Transparency = 0.55
+	beamPoint.Enabled = true
+	markerLabel.Text = world.npc and ("поговорить: " .. world.npc) or "следующая сцена"
+end
+
+local function typeText(label, value, onDone)
+	if state.typing then
+		state.typing:Disconnect()
+		state.typing = nil
+	end
+	state.fullText = value
+	label.Text = ""
+	local index = 0
+	state.typing = RunService.Heartbeat:Connect(function(dt)
+		index = math.min(#value, index + math.max(1, math.floor(dt * 90)))
+		label.Text = string.sub(value, 1, index)
+		if index >= #value then
+			state.typing:Disconnect()
+			state.typing = nil
+			if onDone then
+				onDone()
 			end
 		end
-		busy = false
 	end)
 end
 
-local function makeChoiceButton(choice, order)
-	local locked = not choice.available
+local function makeChoiceButton(choice, order, enabled)
 	local button = new("TextButton", {
+		Name = "Choice" .. order,
 		LayoutOrder = order,
-		Size = UDim2.new(1, -6, 0, 46),
-		BackgroundColor3 = if locked then Color3.fromRGB(26, 30, 42) else Color3.fromRGB(32, 39, 58),
-		BackgroundTransparency = if locked then 0.45 else 0.05,
+		Size = UDim2.new(0, 0, 1, 0),
+		AutomaticSize = Enum.AutomaticSize.X,
+		BackgroundColor3 = if enabled then Color3.fromRGB(30, 40, 60) else Color3.fromRGB(24, 28, 38),
 		BorderSizePixel = 0,
-		AutoButtonColor = not locked,
-		Text = "",
-		Selectable = not locked,
+		Text = choice.text,
+		Font = Enum.Font.Gotham,
+		TextSize = 13,
+		TextColor3 = if enabled then COLORS.text else COLORS.locked,
+		TextTruncate = Enum.TextTruncate.AtEnd,
+		AutoButtonColor = enabled,
 	}, {
-		corner(10),
-		new("UIStroke", {
-			Color = if locked then Color3.fromRGB(50, 56, 72) else Color3.fromRGB(70, 90, 130),
-			Transparency = 0.35,
-		}),
-		new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14) }),
-		new("TextLabel", {
-			Name = "Label",
-			Size = UDim2.new(1, 0, 1, 0),
-			BackgroundTransparency = 1,
-			Font = Enum.Font.GothamMedium,
-			TextSize = 15,
-			TextColor3 = if locked then COLORS.locked else COLORS.text,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextWrapped = true,
-			Text = choice.text .. (locked and ("  ·  " .. tostring(choice.reason or "закрыто")) or ""),
+		corner(8),
+		new("UIPadding", {
+			PaddingLeft = UDim.new(0, 12),
+			PaddingRight = UDim.new(0, 12),
+			PaddingTop = UDim.new(0, 6),
+			PaddingBottom = UDim.new(0, 6),
 		}),
 	})
-	if not locked then
-		button.MouseEnter:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(44, 56, 82) }):Play()
-		end)
-		button.MouseLeave:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(32, 39, 58) }):Play()
-		end)
+	button.Parent = choicesBox
+	if enabled then
 		button.Activated:Connect(function()
-			if busy then
-				return
-			end
 			Choose:FireServer(choice.index)
 		end)
 	end
 	return button
 end
 
--- Кнопка телепорта последней главы. Координаты и доступность приходят с сервера.
-local function makeTeleportButton(teleport, order)
-	local available = teleport.available ~= false
-	local button = new("TextButton", {
-		LayoutOrder = order,
-		Size = UDim2.new(1, -6, 0, 56),
-		BackgroundColor3 = if available then Color3.fromRGB(120, 53, 15) else Color3.fromRGB(30, 28, 26),
-		BackgroundTransparency = if available then 0.05 else 0.5,
-		BorderSizePixel = 0,
-		AutoButtonColor = available,
-		Text = "",
-		Selectable = available,
-	}, {
-		corner(12),
-		new("UIStroke", {
-			Color = if available then Color3.fromRGB(251, 146, 60) else Color3.fromRGB(70, 62, 55),
-			Transparency = 0.15,
-			Thickness = 2,
-		}),
-		new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14) }),
-		new("TextLabel", {
-			Name = "Title",
-			Size = UDim2.new(1, 0, 0, 18),
-			BackgroundTransparency = 1,
-			Font = Enum.Font.GothamBold,
-			TextSize = 12,
-			TextColor3 = Color3.fromRGB(253, 186, 116),
-			TextXAlignment = Enum.TextXAlignment.Left,
-			Text = string.upper(teleport.title or "ТЕЛЕПОРТ"),
-		}),
-		new("TextLabel", {
-			Name = "Label",
-			Position = UDim2.new(0, 0, 0, 20),
-			Size = UDim2.new(1, 0, 0, 26),
-			BackgroundTransparency = 1,
-			Font = Enum.Font.GothamMedium,
-			TextSize = 15,
-			TextColor3 = if available then Color3.fromRGB(255, 237, 213) else COLORS.locked,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			Text = (teleport.label or "Телепорт") ..
-				(available and ("  ·  " .. tostring(teleport.targetName or "")) or ("  ·  " .. tostring(teleport.reason or "закрыто"))),
-		}),
-	})
-	if available then
-		button.MouseEnter:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(154, 66, 18) }):Play()
-		end)
-		button.MouseLeave:Connect(function()
-			TweenService:Create(button, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(120, 53, 15) }):Play()
-		end)
-		button.Activated:Connect(function()
-			if busy then
-				return
-			end
-			if view and view.teleport then
-				Teleport:FireServer(view.id)
-				-- Вспышка: телепорт должен ощущаться, а не просто случиться.
-				local flash = new("Frame", {
-					Size = UDim2.fromScale(1, 1),
-					BackgroundColor3 = Color3.fromRGB(251, 146, 60),
-					BackgroundTransparency = 0.15,
-					BorderSizePixel = 0,
-					ZIndex = 50,
-				})
-				flash.Parent = root
-				TweenService:Create(flash, TweenInfo.new(0.9), { BackgroundTransparency = 1 }):Play()
-				task.delay(1, function()
-					flash:Destroy()
-				end)
-			end
-		end)
+local function renderEnding(view)
+	local endingData = StoryData.endings[view.ending.id]
+	if not endingData then
+		return
 	end
-	return button
+	ending.Visible = true
+	endKind.Text = TYPE_LABEL[endingData.type] or "КОНЦОВКА"
+	endKind.TextColor3 = TYPE_COLOR[endingData.type] or COLORS.accent
+	endTitle.Text = endingData.title or view.ending.id
+	endSummary.Text = endingData.summary or ""
+	endText.Text = endingData.text or ""
+	marker.Enabled = false
+	beam.Transparency = 1
+	beamPoint.Enabled = false
+	panel.Visible = false
 end
 
-local function renderJournal(progress)
-	clear(sideContent)
-	local order = 0
-	local items = progress.items or {}
-	local flags = progress.flags or {}
-	local any = false
+local function render(view)
+	state.view = view
+	ending.Visible = false
+	panel.Visible = true
 
-	for itemId, owned in pairs(items) do
-		if owned then
-			any = true
-			order += 1
-			new("TextLabel", {
-				LayoutOrder = order,
-				Size = UDim2.new(1, -4, 0, 18),
-				BackgroundTransparency = 1,
-				Font = Enum.Font.GothamMedium,
-				TextSize = 13,
-				TextColor3 = COLORS.true_,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				TextTruncate = Enum.TextTruncate.AtEnd,
-				Text = "◆ " .. (StoryData.items[itemId] and StoryData.items[itemId].name or tostring(itemId)),
-			}).Parent = sideContent
-		end
+	local chapter = view.chapter or (StoryData.meta.chapters and StoryData.meta.chapters[view.act] and StoryData.meta.chapters[view.act].title) or ("Акт " .. tostring(view.act))
+	actLabel.Text = string.upper(chapter)
+	sceneLabel.Text = view.scene or ""
+
+	local items = {}
+	for id, _ in pairs(view.items or {}) do
+		local item = StoryData.items and StoryData.items[id]
+		table.insert(items, item and item.name or id)
+	end
+	table.sort(items)
+	itemsLabel.Text = #items > 0 and table.concat(items, " · ") or "Инвентарь пуст"
+
+	if view.progress then
+		progressLabel.Text = string.format("Сцен пройдено: %d из %d", view.progress.visited or 0, view.progress.total or 0)
 	end
 
-	for flag, value in pairs(flags) do
-		if value then
-			any = true
-			order += 1
-			new("TextLabel", {
-				LayoutOrder = order,
-				Size = UDim2.new(1, -4, 0, 16),
-				BackgroundTransparency = 1,
-				Font = Enum.Font.Gotham,
-				TextSize = 12,
-				TextColor3 = COLORS.muted,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				TextWrapped = true,
-				Text = "· " .. (StoryData.flags[flag] and StoryData.flags[flag].label or tostring(flag)),
-			}).Parent = sideContent
-		end
-	end
+	speakerLabel.Text = view.speaker or ""
+	local okColor, parsed = pcall(Color3.fromHex, view.color or "#7dd3fc")
+	speakerLabel.TextColor3 = if okColor then parsed else COLORS.accent
 
-	if not any then
-		new("TextLabel", {
-			LayoutOrder = 1,
-			Size = UDim2.new(1, -4, 0, 40),
-			BackgroundTransparency = 1,
-			Font = Enum.Font.Gotham,
-			TextSize = 12,
-			TextColor3 = COLORS.muted,
-			TextWrapped = true,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Top,
-			Text = "Пока пусто. Всё, что найдёшь, появится здесь.",
-		}).Parent = sideContent
-	end
-end
-
-local function showEnding(ending)
-	endKind.Text = TYPE_LABEL[ending.type] or "КОНЦОВКА"
-	endKind.TextColor3 = TYPE_COLOR[ending.type] or COLORS.accent
-	endTitle.Text = ending.title
-	endSummary.Text = ending.summary or ""
-	endText.Text = ending.text or ""
-
-	endScreen.Visible = true
-	endScreen.BackgroundTransparency = 1
-	TweenService:Create(endScreen, TweenInfo.new(0.6), { BackgroundTransparency = 0.08 }):Play()
-	story.BackgroundTransparency = 0.7
-end
-
-local function render(newView)
-	view = newView
-	endScreen.Visible = false
-	story.BackgroundTransparency = 0.06
-
-	actLabel.Text = string.upper(view.chapter ~= "" and view.chapter or (ACT_NAMES[view.act] or ("Акт " .. tostring(view.act))))
-	sceneLabel.Text = view.scene .. (if view.notice then ("  ·  " .. tostring(view.notice)) else "")
-	speakerLabel.Text = view.speaker
-	speakerLabel.TextColor3 = Color3.fromHex(view.color or "#7dd3fc")
-	setBodyText(view.text, false)
-
-	clear(choicesScroll)
-
-	-- Анимации: новый проигрыватель на каждую сцену, цикл бесконечный.
+	-- Анимации сцены: выключаем прошлую и включаем новую.
 	if view.animations and #view.animations > 0 then
-		cinema = Cinema.new(view.animations, 4)
-		local first = cinema:advance(0)
-		local parts = {}
-		for _, frame in ipairs(first) do
-			table.insert(parts, frame.text or "")
-		end
-		animLabel.Text = table.concat(parts, "   ")
+		state.cinema = Cinema.new(view.animations, 6)
+		state.animIndex = 0
 	else
-		cinema = nil
+		state.cinema = nil
 		animLabel.Text = ""
 	end
 
-	if view.isEnding then
-		showEnding(view.ending)
-		return
+	clearChoices()
+	local worldInfo = view.world
+	local ready = worldInfo == nil or worldInfo.ready ~= false
+	-- Кнопки не блокируем по расстоянию: иначе игрок застрянет, если метка
+	-- оказалась за геометрией. Расстояние показываем подсказкой.
+	for index, choice in ipairs(view.choices or {}) do
+		makeChoiceButton({ text = choice.text, index = index }, index, choice.available ~= false)
 	end
 
-	if view.teleport then
-		makeTeleportButton(view.teleport, 0).Parent = choicesScroll
+	-- Подсказка «куда идти» и кнопки действий.
+	if view.ending then
+		renderEnding(view)
+	elseif worldInfo and worldInfo.distance then
+		if ready then
+			hintLabel.Text = worldInfo.npc
+					and ("Рядом: " .. worldInfo.npc .. " · сцена " .. view.scene)
+				or ("Дошёл до места · сцена " .. view.scene)
+		else
+			hintLabel.Text = string.format("Иди по метке ▼ · ещё %d шагов", worldInfo.distance)
+		end
+	else
+		hintLabel.Text = ""
 	end
 
-	for order, choice in ipairs(view.choices) do
-		makeChoiceButton(choice, order + 1).Parent = choicesScroll
+	-- Телепорт.
+	if view.teleport and not view.ending then
+		teleportButton.Visible = true
+		teleportButton.Text = string.upper(view.teleport.label or "ТЕЛЕПОРТ")
+		teleportButton.BackgroundColor3 = if view.teleport.available ~= false then COLORS.hot else Color3.fromRGB(90, 70, 55)
+		teleportButton.TextColor3 = if view.teleport.available ~= false then Color3.fromRGB(20, 12, 4) else COLORS.locked
+	else
+		teleportButton.Visible = false
 	end
 
-	if view.progress then
-		renderJournal(view.progress)
-		local p = view.progress
-		progressLabel.Text = string.format("Сцен исследовано: %d из %d", p.visited, p.total)
+	strikeButton.Visible = view.act == 4 and not view.ending
+	setMarker(worldInfo)
+
+	typeText(bodyLabel, view.text or "")
+end
+
+-- Сервер присылает view с полями сцены; клиент только рисует.
+local function refresh()
+	local ok, view = pcall(function()
+		return RequestState:InvokeServer()
+	end)
+	if ok and view then
+		render(view)
 	end
 end
 
---------------------------------------------------------------------------------
--- Управление
---------------------------------------------------------------------------------
+StateChanged.OnClientEvent:Connect(function(view)
+	render(view)
+end)
 
-bodyScroll.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		if busy and view then
-			typewriterToken += 1
-			bodyLabel.Text = view.text
-			busy = false
-		end
+teleportButton.Activated:Connect(function()
+	local view = state.view
+	if view and view.teleport then
+		Teleport:FireServer(view.id)
 	end
+end)
+
+strikeButton.Activated:Connect(function()
+	Strike:FireServer()
 end)
 
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.R and view and not view.isEnding then
-		-- R — повторить текущий текст без печатной машинки
-		bodyLabel.Text = view.text
+	if input.KeyCode == Enum.KeyCode.F then
+		Strike:FireServer()
+	elseif input.KeyCode == Enum.KeyCode.Space then
+		local view = state.view
+		if view and view.teleport then
+			Teleport:FireServer(view.id)
+		end
 	end
 end)
 
-local function start()
-	story.BackgroundTransparency = 0.06
-	render(RequestState:InvokeServer())
+againButton.Activated:Connect(function()
+	Restart:FireServer()
+	refresh()
+end)
+
+-- Здоровье в верхней панели.
+local function watchHealth()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local function update()
+		local ratio = math.clamp(humanoid.Health / math.max(humanoid.MaxHealth, 1), 0, 1)
+		hpFill.Size = UDim2.new(ratio, 0, 1, 0)
+		hpFill.BackgroundColor3 = if ratio > 0.5 then COLORS.good elseif ratio > 0.25 then COLORS.true_ else COLORS.bad
+	end
+	humanoid.HealthChanged:Connect(update)
+	update()
 end
+task.spawn(watchHealth)
 
-endAgain.Activated:Connect(function()
-	Restart:FireServer()
+player.CharacterAdded:Connect(function()
+	task.spawn(watchHealth)
 end)
 
-restartButton.Activated:Connect(function()
-	Restart:FireServer()
+-- Кадры анимации прокручиваются бесконечно, пока сцена не сменится.
+RunService.RenderStepped:Connect(function(dt)
+	if not state.cinema then
+		return
+	end
+	local tracks = state.cinema:advance(dt)
+	local parts = {}
+	for _, track in ipairs(tracks) do
+		if track.text and track.text ~= "" then
+			table.insert(parts, track.text)
+		end
+	end
+	animLabel.Text = table.concat(parts, "   ")
 end)
 
-StateChanged.OnClientEvent:Connect(render)
+-- Метка пульсирует, чтобы её было видно издалека.
+task.spawn(function()
+	local t = 0
+	while true do
+		t += task.wait(0.08)
+		if marker.Enabled then
+			local scale = 1 + math.sin(t * 3) * 0.04
+			markerArrow.TextSize = 44 * scale
+			beam.Transparency = 0.55 + math.sin(t * 2) * 0.1
+		end
+	end
+end)
 
-start()
+refresh()

@@ -112,6 +112,7 @@ const modules = [
 	['StoryEngine', 'ReplicatedStorage/Shared/StoryEngine.lua'],
 	['Cinema', 'ReplicatedStorage/Shared/Cinema.lua'],
 	['TeleportDirector', 'ReplicatedStorage/Shared/TeleportDirector.lua'],
+	['WorldKit', 'ReplicatedStorage/Shared/WorldKit.lua'],
 ];
 for (const [name, rel] of modules) {
 	const ref = shared ? childByName(dom, shared, name) : null;
@@ -139,6 +140,9 @@ const storyInside = dom.instance(shared ? childByName(dom, shared, 'StoryData') 
 check('сюжет внутри StoryData', storyInside.includes('fusion_last'));
 check('финальная глава внутри StoryData', storyInside.includes('Жестокий сплав огня и ревности'));
 check('телепорт ведёт на арену', storyInside.includes('-201.6'));
+check('координаты мира внутри StoryData', storyInside.includes('StoryData.world'));
+check('живые НПС внутри StoryData', storyInside.includes('cast'));
+check('маршрут по актам внутри StoryData', storyInside.includes('StoryData.order'));
 
 let parts = 0;
 let fires = 0;

@@ -245,11 +245,38 @@ function toLua(v, depth = 0) {
   return `{\n${keys.map((k) => `${pad}${luaKey(k)} = ${toLua(v[k], depth + 1)},`).join('\n')}\n${close}}`;
 }
 
+// Мир: координаты кластеров и живые НПС из game/layout.json кладутся рядом с сюжетом,
+// чтобы WorldKit мог построить маршрут «иди вперёд» без отдельного файла в игре.
+const LAYOUT_PATH = path.join(ROOT, 'game', 'layout.json');
+let world = null;
+if (fs.existsSync(LAYOUT_PATH)) {
+  const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf8'));
+  world = {
+    spawn: layout.spawn,
+    clusters: (layout.clusters ?? []).map((c) => ({
+      id: c.id,
+      center: c.center,
+      y: c.y,
+      signCount: c.signCount,
+      actors: (c.actors ?? []).map((a) => a.name),
+    })),
+    cast: (layout.cast ?? []).map((c) => ({ name: c.name, pos: c.pos })),
+    arena: layout.finale?.center ?? null,
+    fire: layout.finale?.fireCenter ?? null,
+  };
+}
+
+// Порядок сцен в файле = порядок прохождения по карте: WorldKit идёт по нему.
+const order = (story.nodes ?? []).map((n) => n.id);
+
 const lua = `--!strict
 -- СГЕНЕРИРОВАНО tools/build-story.mjs из story/story.json — не редактировать руками.
 -- Сюжет: «${story.meta?.title}» (${stats.nodes} сцен, ${stats.endings} концовки)
 
 local StoryData = ${toLua(story, 0)}
+
+StoryData.world = ${world ? toLua(world, 0) : 'nil'}
+StoryData.order = {${order.map((id) => `"${id}"`).join(', ')}}
 
 return StoryData
 `;

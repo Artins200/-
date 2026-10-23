@@ -190,6 +190,40 @@
      "fromCluster": "z0_c0",
      "toCluster": "z3_c6"
     }
+   ],
+   "route": [
+    {
+     "act": 1,
+     "zone": "spawn"
+    },
+    {
+     "act": 1,
+     "zone": "z3_c6"
+    },
+    {
+     "act": 2,
+     "zone": "z1_c4"
+    },
+    {
+     "act": 2,
+     "zone": "z0_c0"
+    },
+    {
+     "act": 3,
+     "zone": "z0_c2"
+    },
+    {
+     "act": 3,
+     "zone": "z0_c3"
+    },
+    {
+     "act": 4,
+     "zone": "z4_c8"
+    },
+    {
+     "act": 4,
+     "zone": "z4_c7"
+    }
    ]
   }
  },

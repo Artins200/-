@@ -415,6 +415,69 @@ local broken = StoryEngine.new(StoryData, { nodeId = "нет такой сцен
 check("битое сохранение откатывается на старт", broken.state.nodeId == "start")
 
 --------------------------------------------------------------------------------
+print("— мир: раскладка сюжета по карте")
+
+local wk = WorldKit.new(StoryData)
+local plan = wk.plan
+local planned, finite, dupes = 0, true, 0
+local seenPoints = {}
+for _, node in ipairs(StoryData.nodes) do
+	local entry = plan[node.id]
+	if entry then
+		planned += 1
+		for i = 1, 3 do
+			if type(entry.pos[i]) ~= "number" or entry.pos[i] ~= entry.pos[i] or math.abs(entry.pos[i]) > 1e6 then
+				finite = false
+			end
+		end
+		local key = string.format("%.1f:%.1f", entry.pos[1], entry.pos[3])
+		if seenPoints[key] then dupes += 1 end
+		seenPoints[key] = true
+	end
+end
+check("у каждой сцены есть точка на карте", planned == #StoryData.nodes, planned .. " из " .. #StoryData.nodes)
+check("координаты сцен конечные", finite)
+check("сцены не свалены в одну точку", dupes < #StoryData.nodes / 3, dupes .. " совпадений")
+
+local route = wk:route()
+check("маршрут начинается у спавна", route[1] and route[1].zone == "spawn")
+check("маршрут заканчивается на арене", route[#route] and route[#route].zone == "z4_c7")
+check("акты в маршруте по возрастанию", (function()
+	for i = 2, #route do
+		if route[i].act < route[i - 1].act then return false end
+	end
+	return true
+end)())
+
+local first = plan["start"]
+local arenaScene = plan["final_choice"]
+check("старт рядом со спавном", first and wk:distanceTo("start", StoryData.world.spawn) < 200,
+	first and wk:distanceTo("start", StoryData.world.spawn))
+check("финал у арены", arenaScene and arenaScene.act == 4)
+
+local withNpc = 0
+for _, node in ipairs(StoryData.nodes) do
+	local entry = plan[node.id]
+	if entry and entry.npc then withNpc += 1 end
+end
+check("живые НПС ведут хотя бы часть сцен", withNpc > 10, withNpc .. " сцен у НПС")
+
+check("каст с карты подхвачен", #(StoryData.world.cast or {}) > 100, #(StoryData.world.cast or {}))
+local demidSpot
+for _, npc in ipairs(StoryData.world.cast or {}) do
+	if npc.name == "Демид" then demidSpot = npc.pos break end
+end
+check("Демид есть на карте", demidSpot ~= nil)
+check("НПС находится по имени персонажа", demidSpot ~= nil and wk:findNpc("demid", demidSpot) ~= nil)
+check("точка сцены не улетает в небо", first and math.abs(first.pos[2]) < 200)
+
+local auto = 0
+for _, node in ipairs(StoryData.nodes) do
+	if wk:autoChoice(node.id) then auto += 1 end
+end
+check("есть сцены с автопереходом (идёшь — сцена сменяется)", auto > 5, auto)
+
 print("")
 print(string.format("Проверок: %d, провалено: %d", checks, failures))
 return failures
+
