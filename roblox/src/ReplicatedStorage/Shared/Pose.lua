@@ -41,7 +41,8 @@ Pose.definitions = {
 	choke = { leftArm = { pitch = 1.55, yaw = 0.2 }, rightArm = { pitch = 1.55, yaw = -0.2 }, lean = 0.35 },
 	guard = { leftArm = { pitch = 0.9 }, rightArm = { pitch = 0.9 }, lean = 0.1 },
 	kneel = { leftLeg = { pitch = 1.4 }, rightLeg = { pitch = 1.4 }, drop = 2.0, lean = 0.15 },
-	fall = { lean = 1.25, drop = 2.6, forward = 1.5 },
+	-- fall — не «наклон», а завал: всё тело поворачивается вокруг ступней и ложится.
+	fall = { topple = 1.55, lift = 0.18 },
 }
 
 --- Части модели, входящие в группу (в порядке цепочки).
@@ -122,11 +123,13 @@ function Pose.apply(model, base, poseName, alpha)
 	local forward = def.forward or 0
 	local drop = def.drop or 0
 	local lean = (def.lean or 0) * alpha
+	local topple = (def.topple or 0) * alpha
 	local offset = rotation * Vector3.new(0, -drop * alpha, -forward * alpha)
 
 	local hip = torsoBase * Vector3.new(0, -th * 0.5, 0)
 	local neck = torsoBase * Vector3.new(0, th * 0.5, 0)
-	local leanRot = CFrame.Angles(lean, 0, 0)
+	-- Наклон вперёд: персонаж смотрит в −Z, значит корпус уходит в −Z.
+	local leanRot = CFrame.Angles(-lean, 0, 0)
 
 	-- Мировая точка корпуса с учётом сдвига и наклона: по ней считаются плечи и бёдра.
 	local function leaned(worldPoint)
@@ -135,6 +138,20 @@ function Pose.apply(model, base, poseName, alpha)
 			p = rotateAbout(CFrame.new(p), hip + offset, leanRot, rotation).Position
 		end
 		return p
+	end
+
+	-- 0. Падение: тело заваливается вокруг ступней и ложится на пол.
+	if topple ~= 0 then
+		local feet = torsoBase.Position - Vector3.new(0, th * 0.5 + 2, 0)
+		local fallRot = CFrame.Angles(-topple, 0, 0)
+		local lift = Vector3.new(0, def.lift or 0, 0)
+		for name, cf in pairs(base.parts) do
+			local part = model:FindFirstChild(name)
+			if part and part:IsA("BasePart") then
+				part.CFrame = rotateAbout(cf, feet, fallRot, rotation) + lift
+			end
+		end
+		return true
 	end
 
 	-- 1. Корпус целиком: R6 — Torso, R15 — UpperTorso и LowerTorso.

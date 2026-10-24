@@ -206,21 +206,23 @@
 <path d="M1362 182 l14 8 -14 8z" fill="#f97316"/>
 <text x="1334" y="168" fill="#f97316" font-size="12">портал в следующую локацию</text>
 <text x="70" y="306" fill="#e8ecf6" font-size="19" font-weight="600">Как устроена одна комната</text>
-<text x="70" y="330" fill="#8b93a7" font-size="13">вид сверху: kai_truth2 · Рубка. Разговор с Каем · реплики: Тринадцатый — твой. Иди к реле. / К реле так к реле.</text>
+<text x="70" y="330" fill="#8b93a7" font-size="13">вид сверху: vanya_fight · Двор. Драка · реплики: Защищайся! / Хватит! / Всё. Всё, хватит.</text>
 <rect x="110.0" y="350.0" width="1180.0" height="250" rx="8" fill="#111726" stroke="#25304a"/>
-<circle cx="332.7" cy="450.0" r="9" fill="#7dd3fc" fill-opacity="0.9"/>
-<text x="332.7" y="433.0" fill="#7dd3fc" font-size="12" text-anchor="middle">вход · сюда выбрасывает портал</text>
-<circle cx="810.2" cy="423.6" r="11" fill="#a3e635" fill-opacity="0.9"/>
-<text x="810.2" y="404.6" fill="#a3e635" font-size="12" text-anchor="middle">Кай Вэрн · лицом к игроку (110°)</text>
-<circle cx="810.2" cy="476.4" r="11" fill="#a3e635" fill-opacity="0.9"/>
-<text x="810.2" y="457.4" fill="#a3e635" font-size="12" text-anchor="middle">Артём · лицом к игроку (70°)</text>
-<rect x="749.0" y="446.0" width="293.9" height="8" rx="2" fill="#e2e8f0" fill-opacity="0.9"/>
-<text x="895.9" y="440.0" fill="#e2e8f0" font-size="12" text-anchor="middle">вывеска с текстом сцены</text>
-<circle cx="1091.8" cy="NaN" r="8" fill="#f97316" fill-opacity="0.9"/>
-<text x="1091.8" y="NaN" fill="#f97316" font-size="12" text-anchor="middle">выход · портал дальше</text>
-<line x1="332.7" y1="610.0" x2="1091.8" y2="610.0" stroke="#2b3446" stroke-width="2" marker-end="url(#arrow)"/>
+<circle cx="479.6" cy="450.0" r="9" fill="#7dd3fc" fill-opacity="0.9"/>
+<text x="479.6" y="433.0" fill="#7dd3fc" font-size="12" text-anchor="middle">вход · сюда выбрасывает портал</text>
+<circle cx="685.3" cy="446.4" r="11" fill="#a3e635" fill-opacity="0.9"/>
+<text x="685.3" y="427.4" fill="#a3e635" font-size="12" text-anchor="middle">Ваня · guard</text>
+<circle cx="746.5" cy="453.6" r="11" fill="#a3e635" fill-opacity="0.9"/>
+<text x="746.5" y="434.6" fill="#a3e635" font-size="12" text-anchor="middle">Артём · guard</text>
+<circle cx="704.9" cy="463.6" r="11" fill="#a3e635" fill-opacity="0.9"/>
+<text x="704.9" y="444.6" fill="#a3e635" font-size="12" text-anchor="middle">Ярик</text>
+<rect x="736.7" y="446.0" width="293.9" height="8" rx="2" fill="#e2e8f0" fill-opacity="0.9"/>
+<text x="1033.7" y="440.0" fill="#e2e8f0" font-size="12">вывеска с текстом сцены</text>
+<circle cx="1091.8" cy="450.0" r="8" fill="#f97316" fill-opacity="0.9"/>
+<text x="1091.8" y="434.0" fill="#f97316" font-size="12" text-anchor="middle">выход · портал дальше</text>
+<line x1="479.6" y1="610.0" x2="1091.8" y2="610.0" stroke="#2b3446" stroke-width="2" marker-end="url(#arrow)"/>
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2b3446"/></marker></defs>
-<text x="712.2" y="632.0" fill="#5d6884" font-size="12" text-anchor="middle">игрок идёт вперёд</text>
+<text x="785.7" y="632.0" fill="#5d6884" font-size="12" text-anchor="middle">игрок идёт вперёд</text>
 <text x="70" y="454" fill="#e8ecf6" font-size="17" font-weight="600">Действия — позами, а не текстом</text>
 <rect x="70" y="470" width="150" height="34" rx="6" fill="#151b29" stroke="#25304a"/>
 <text x="80" y="492" fill="#a3e635" font-size="13" font-family="ui-monospace, monospace">step</text>

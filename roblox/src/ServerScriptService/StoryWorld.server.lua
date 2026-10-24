@@ -64,6 +64,7 @@ for index, id in ipairs(StoryData.order) do
 			local gui = sign and sign:FindFirstChildOfClass("SurfaceGui")
 			local label = gui and gui:FindFirstChildOfClass("TextLabel")
 			local actors = {}
+			local actorOrder = {}
 			for _, child in ipairs(model:GetChildren()) do
 				local humanoid = nil
 				if child:IsA("Model") then
@@ -76,6 +77,7 @@ for index, id in ipairs(StoryData.order) do
 				end
 				if humanoid then
 					actors[child.Name] = { model = child, base = Pose.capture(child) }
+					table.insert(actorOrder, child.Name)
 				end
 			end
 			table.insert(scenes, {
@@ -87,6 +89,8 @@ for index, id in ipairs(StoryData.order) do
 				gui = gui,
 				label = label,
 				actors = actors,
+				actorOrder = actorOrder,
+				down = {},
 				arrival = model:FindFirstChild("Arrival"),
 				portal = wing:FindFirstChild("Portal_" .. id),
 				lines = node.lines or { { s = node.speaker, t = node.text, pose = "say" } },
@@ -118,32 +122,118 @@ local function poseFor(scene, name, poseName, alpha)
 	end
 end
 
+--- Позы, после которых персонаж остаётся лежать или стоять на колене до конца сцены.
+local DOWN = { fall = true, kneel = true }
+
+--- Стойки до первой реплики: комната живая ещё до текста.
+-- Драка — обе стороны в защите, разговор — герой стоит, собеседник говорит.
+local function stanceFor(scene)
+	local poses = {}
+	for _, line in ipairs(scene.lines) do
+		poses[line.pose or "say"] = true
+	end
+	local fighting = poses.punch or poses.choke or poses.throw or poses.fall
+	local down = poses.kneel
+	local main = "idle"
+	local partner = "say"
+	if down then
+		main = "kneel"
+	elseif fighting or scene.act == 4 then
+		main = "guard"
+		partner = "guard"
+	end
+	local out = {}
+	for index, name in ipairs(scene.actorOrder) do
+		out[name] = if index == 1 then main elseif index == 2 then partner else "idle"
+	end
+	return out
+end
+
 --- Все, кроме говорящего, слушают.
 local function idleExcept(scene, speaker)
 	for name in pairs(scene.actors) do
-		if name ~= speaker then
+		if name ~= speaker and not scene.down[name] then
 			poseFor(scene, name, "idle", 1)
 		end
 	end
 end
 
---- Действие руками: замах → рывок → возврат в стойку.
+--- Ближайший собеседник: к кому герой делает шаг в драке.
+local function partnerOf(scene, speaker)
+	for _, name in ipairs(scene.actorOrder) do
+		if name ~= speaker then
+			return scene.actors[name]
+		end
+	end
+	return nil
+end
+
+--- Шаг к собеседнику: модель сокращает дистанцию и возвращается назад.
+-- Части анкорены, поэтому идём сдвигом базы позы, а не Humanoid:MoveTo.
+local function lunge(actor, partner, distance)
+	if not actor or not partner then
+		return nil
+	end
+	local mine = actor.base.root or actor.base.torso
+	local theirs = partner.base.root or partner.base.torso
+	if not mine or not theirs then
+		return nil
+	end
+	local delta = theirs.Position - mine.Position
+	delta = Vector3.new(delta.X, 0, delta.Z)
+	local gap = delta.Magnitude
+	if gap < 0.2 then
+		return nil
+	end
+	local step = math.min(distance, math.max(0, gap - 2.0))
+	if step < 0.05 then
+		return nil
+	end
+	local shift = delta.Unit * step
+	Pose.shift(actor.base, shift)
+	return shift
+end
+
+--- Действие руками: замах → рывок к собеседнику → возврат в стойку.
 local function playAction(scene, speaker, poseName)
 	local actor = scene.actors[speaker]
-	if not actor or not Pose.actions[poseName] then
-		poseFor(scene, speaker, poseName, 1)
+	if not actor then
 		return
 	end
-	local part = actor.model:FindFirstChild("Right Arm") or actor.model:FindFirstChild("Torso")
-	if not part then
+	if not Pose.actions[poseName] then
+		Pose.apply(actor.model, actor.base, poseName, 1)
 		return
 	end
+	local partner = partnerOf(scene, speaker)
 	local windUp = if poseName == "punch" or poseName == "throw" then "throw" else "guard"
+
+	-- Замах и шаг к собеседнику: удар и захват видно, а не читается.
 	Pose.apply(actor.model, actor.base, windUp, 0.6)
+	local shift = lunge(actor, partner, if poseName == "fall" then 0 else 1.9)
 	task.wait(0.16)
 	Pose.apply(actor.model, actor.base, poseName, 1)
-	task.delay(0.9, function()
-		if actor.model.Parent then
+
+	if partner and (poseName == "punch" or poseName == "choke" or poseName == "throw") then
+		-- Второй закрывается или уходит в сторону.
+		task.spawn(function()
+			Pose.apply(partner.model, partner.base, "block", 1)
+			task.wait(0.6)
+			if not scene.down[partner.model.Name] then
+				Pose.apply(partner.model, partner.base, "guard", 1)
+			end
+		end)
+	end
+
+	-- Лежит или стоит на колене — так и остаётся до конца сцены.
+	if DOWN[poseName] then
+		return
+	end
+
+	task.delay(1.0, function()
+		if shift then
+			Pose.shift(actor.base, -shift)
+		end
+		if actor.model.Parent and not scene.down[speaker] then
 			Pose.apply(actor.model, actor.base, "idle", 1)
 		end
 	end)
@@ -187,6 +277,9 @@ local function playScene(player, session, scene)
 
 	for _, line in ipairs(scene.lines) do
 		local name = speakerName(line.s)
+		if DOWN[line.pose or ""] then
+			scene.down[name] = true
+		end
 		local text = engine:interpolate(line.t or "")
 		if scene.label then
 			scene.label.Text = if name ~= "" then string.format("%s: «%s»", name, text) else text
@@ -221,6 +314,13 @@ local function startScene(player, session)
 	local scene = scenes[session.index]
 	if not scene then
 		return
+	end
+	-- Каждый заход в комнату начинается с чистых стоек — даже если сцену уже играли.
+	scene.down = {}
+	local stances = stanceFor(scene)
+	for name, actor in pairs(scene.actors) do
+		Pose.reset(actor.model, actor.base)
+		Pose.apply(actor.model, actor.base, stances[name] or "idle", 1)
 	end
 	for _, other in ipairs(scenes) do
 		if other ~= scene and other.gui then

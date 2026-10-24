@@ -308,6 +308,34 @@ export function buildWing(dom, story, options = {}) {
 		return names.slice(0, 3);
 	}
 
+	/** Кто стоит рядом молча: свидетели сцены из той же школы/арены. */
+	function crowdFor(node) {
+		const cast = ['Ваня', 'Демид', 'Кирилл', 'Максим', 'Богдан', 'Карина', 'Ярик'];
+		const present = new Set((node.lines ?? []).map((line) => characterName(line.s)));
+		const out = [];
+		// В акте I (станция) лишних нет: там тесно и людно по-другому.
+		if ((node.act ?? 1) < 2) return out;
+		// В концовках лишних нет: остаются только двое.
+		if (String(node.id).startsWith('ending_') || node.ending) return out;
+		const seed = [...String(node.id)].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+		for (let step = 0; step < cast.length && out.length < 1; step++) {
+			const name = cast[(seed + step) % cast.length];
+			if (!present.has(name)) out.push(name);
+		}
+		return out;
+	}
+
+	/** Стойка, в которой актёры стоят до первой реплики. */
+	function stanceFor(node) {
+		const poses = new Set((node.lines ?? []).map((line) => line.pose));
+		if (poses.has('punch') || poses.has('choke') || poses.has('throw') || poses.has('fall')) {
+			return { main: 'guard', partner: 'guard' };
+		}
+		if (poses.has('kneel')) return { main: 'kneel', partner: 'say' };
+		if ((node.act ?? 1) === 4) return { main: 'guard', partner: 'guard' };
+		return { main: 'idle', partner: 'say' };
+	}
+
 	order.forEach((id, index) => {
 		const node = byId[id];
 		const cx = BASE_X - index * STEP;
@@ -330,29 +358,47 @@ export function buildWing(dom, story, options = {}) {
 
 		const floor = box.y[0] + FLOOR;
 
-		// 3. Актёры сцены: копии моделей с карты, лицом друг к другу.
+		// 3. Актёры сцены: копии моделей с карты. Стоят тесной группой, как в самих
+		// комнатах плейса: двое лицом к лицу на расстоянии удара, третий рядом,
+		// ещё один — свидетель. Игрок входит слева (−X) и видит всю сцену.
 		const actors = [];
 		const names = actorsOf(node);
-		// Сцена как на подмостках: актёры по краям, между ними вывеска,
-		// все трое развёрнуты к игроку, который входит слева по −X.
-		const spots = [
-			[4.5, -6.6, 110],
-			[4.5, 6.6, 70],
-			[9.5, -10.4, 100],
+		// Близко, как в самих комнатах плейса: собеседники на расстоянии удара.
+		const seats = [
+			[-0.6, -0.9],
+			[1.9, 0.9],
+			[0.2, 3.4],
+			[3.2, -3.4],
 		];
+		const crowd = crowdFor(node);
+		for (const extra of crowd) {
+			if (names.length >= 4) break;
+			if (!names.includes(extra)) names.push(extra);
+		}
+		// Модели персонажей на карте уже стоят повёрнутыми на −90°, компенсируем.
+		const MODEL_BASE_YAW = 90;
+		const seatAt = (seat) => seats[Math.min(seat, seats.length - 1)];
+		const stance = stanceFor(node);
 		names.forEach((name, seat) => {
 			const pick = characterFor({ speaker: Object.keys(story.characters ?? {}).find((k) => characterName(k) === name) ?? node.speaker });
 			const charRef = dom.cloneWithin(pick.ref);
 			dom.transferWithin(charRef, roomRef);
 			dom.setName(charRef, name);
+			// Имя над головой — свойство Humanoid, а не интерфейс: так же, как на карте.
+			const humanoid = childrenOf(dom, charRef).find((c) => c.className === 'Humanoid');
+			if (humanoid) {
+				dom.setProperty(humanoid.referent, 'DisplayName', { String: name });
+				dom.setProperty(humanoid.referent, 'NameDisplayDistance', { Float32: 80 });
+				dom.setProperty(humanoid.referent, 'HealthDisplayDistance', { Float32: 0 });
+			}
 			const charBox = measure(dom, charRef);
 			const center = [(charBox.x[0] + charBox.x[1]) / 2, (charBox.z[0] + charBox.z[1]) / 2];
-			const [offset, offsetZ, facing] = spots[seat] ?? [4.5, 0, 90];
-			// Модели персонажей на карте уже стоят повёрнутыми на −90°, компенсируем.
-			const MODEL_BASE_YAW = 90;
+			const spot = seatAt(seat);
+			// Каждый смотрит на главного героя сцены — разговор идёт между ними.
+			const facing = seat === 0 ? yawTowards(spot, seatAt(1)) : yawTowards(spot, seatAt(0));
 			place(dom, charRef, {
 				pivot: [center[0], charBox.y[0], center[1]],
-				delta: [cx + offset - center[0], floor - charBox.y[0], cz + offsetZ - center[1]],
+				delta: [cx + spot[0] - center[0], floor - charBox.y[0], cz + spot[1] - center[1]],
 				rotY: facing + MODEL_BASE_YAW,
 			});
 			const palette = {
@@ -367,9 +413,16 @@ export function buildWing(dom, story, options = {}) {
 				'Богдан': [0.92, 0.7, 0.2],
 				'Карина': [0.9, 0.4, 0.7],
 				'Ярик': [0.2, 0.85, 0.85],
+				'Кирилл': [0.45, 0.85, 0.45],
+				'Максим': [0.85, 0.5, 0.95],
 			};
 			tint(dom, charRef, palette[name]);
-			actors.push({ name, at: [cx + offset, floor, cz + offsetZ], facing: Math.round(facing * 10) / 10 });
+			actors.push({
+				name,
+				at: [cx + spot[0], floor, cz + spot[1]],
+				facing: Math.round(facing * 10) / 10,
+				stance: seat === 0 ? stance.main : seat === 1 ? stance.partner : 'idle',
+			});
 		});
 		const pick = { name: names[0] };
 
@@ -385,10 +438,11 @@ export function buildWing(dom, story, options = {}) {
 		dom.setProperty(signRef, 'CanTouch', { Bool: false });
 		// Вывеска — экран на дальней стороне комнаты, лицом к входящему игроку.
 		// У вывески текст на передней грани (−Z), поэтому поворот 180° к игроку.
-		placePart(dom, signRef, [cx + 8, floor + 3.4, cz], 180);
+		placePart(dom, signRef, [cx + 7.5, floor + 4.0, cz], 180);
 
 		// 5. Метка входа и метка портала — части в стиле телепортов.
-		const arrival = makePart(dom, roomRef, 'Arrival', [cx - 15, floor + 1.2, cz], [6, 0.6, 6], [0.49, 0.83, 0.99], 0.35);
+		// Вход ближе к сцене: игрок входит и сразу оказывается в разговоре.
+		const arrival = makePart(dom, roomRef, 'Arrival', [cx - 9, floor + 1.2, cz], [6, 0.6, 6], [0.49, 0.83, 0.99], 0.35);
 		void arrival;
 		makePart(dom, roomRef, 'Exit', [cx + 16, floor + 0.4, cz], [6, 0.6, 6], [0.98, 0.45, 0.09], 0.4);
 
@@ -406,8 +460,8 @@ export function buildWing(dom, story, options = {}) {
 				t: line.t,
 				pose: poseName(line),
 			})),
-			sign: [cx + 8, floor + 3.3, cz],
-			arrival: [cx - 15, floor + 3.2, cz],
+			sign: [cx + 7.5, floor + 3.9, cz],
+			arrival: [cx - 9, floor + 3.2, cz],
 			exit: [cx + 16, floor + 0.4, cz],
 			center: [cx, floor, cz],
 		});

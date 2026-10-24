@@ -148,6 +148,7 @@ let npcs = 0;
 let r15 = 0;
 let r6 = 0;
 const noTorso = [];
+const unnamed = [];
 let emptySigns = 0;
 let portalsInFile = 0;
 if (wing) {
@@ -167,6 +168,8 @@ if (wing) {
 				const kids = dom.children(child).map((r) => dom.instance(r));
 				if (!kids.some((k) => k.className === 'Humanoid')) continue;
 				npcs++;
+				const humanoid = kids.find((k) => k.className === 'Humanoid');
+				if ((humanoid?.properties?.DisplayName?.String ?? '') !== c.name) unnamed.push(`${inst.name}/${c.name}`);
 				const names = new Set(kids.map((k) => k.name));
 				if (names.has('UpperTorso')) r15++;
 				else if (names.has('Torso')) r6++;
@@ -184,6 +187,7 @@ check('в комнатах минимум двое', npcs >= scenes.length * 2 -
 check('порталов столько же, сколько сцен', portalsInFile === scenes.length, `${portalsInFile}`);
 check('у каждого актёра есть корпус (R6 или R15)', noTorso.length === 0, noTorso.slice(0, 4).join(', '));
 check('на карте есть и R6, и R15 — позы понимают оба', r6 > 0 && r15 > 0, `R6 ${r6}, R15 ${r15}`);
+check('имя видно у каждого актёра', unnamed.length === 0, unnamed.slice(0, 4).join(', '));
 
 const poseSource = source('ReplicatedStorage/Shared/Pose.lua');
 check('Pose знает части R15', poseSource.includes('UpperTorso') && poseSource.includes('RightUpperArm'));
@@ -221,14 +225,30 @@ check('игрок появляется на полу, а не над пропа�
 		.map((r) => dom.instance(r))
 		.filter((c) => c.className === 'Model');
 	check('в первой комнате двое актёров', actorsHere.length === 2, `${actorsHere.length}`);
-	const faced = actorsHere.every((actor) => {
+	// Актёры стоят кучно и смотрят друг на друга, а не в стену.
+	const spots = actorsHere.map((actor) => {
 		const torso =
 			dom.children(actor.referent).map((r) => dom.instance(r)).find((k) => k.name === 'Torso') ??
 			dom.children(actor.referent).map((r) => dom.instance(r)).find((k) => k.name === 'UpperTorso');
-		const a = torso?.properties?.CFrame?.CFrame?.orientation ?? [];
-		return -(a[0]?.[2] ?? 0) < -0.4;
+		const cf = torso?.properties?.CFrame?.CFrame;
+		return { name: actor.name, pos: cf?.position ?? [0, 0, 0], look: [-(cf?.orientation?.[0]?.[2] ?? 0), -(cf?.orientation?.[2]?.[2] ?? 0)] };
 	});
-	check('актёры стоят лицом к входящему игроку', faced);
+	const close = spots.every((a, i) => spots.every((b, j) => i === j || Math.hypot(a.pos[0] - b.pos[0], a.pos[2] - b.pos[2]) < 7));
+	check('актёры стоят группой, в пределах разговора', close, spots.map((s) => `${s.name}@${s.pos.map((v) => v.toFixed(0)).join(':')}`).join(' '));
+	const faced = spots.every((a, i) => {
+		const partner = spots.find((b, j) => j !== i && Math.hypot(a.pos[0] - b.pos[0], a.pos[2] - b.pos[2]) === Math.min(...spots.filter((_, j) => j !== i).map((b) => Math.hypot(a.pos[0] - b.pos[0], a.pos[2] - b.pos[2]))));
+		if (!partner) return true;
+		const dx = partner.pos[0] - a.pos[0];
+		const dz = partner.pos[2] - a.pos[2];
+		const len = Math.hypot(dx, dz) || 1;
+		return (a.look[0] * dx + a.look[1] * dz) / len > 0.6;
+	});
+	check('актёры развёрнуты друг к другу', faced);
+	const named = actorsHere.every((actor) => {
+		const humanoid = dom.children(actor.referent).map((r) => dom.instance(r)).find((k) => k.className === 'Humanoid');
+		return humanoid?.properties?.DisplayName?.String === actor.name && (humanoid?.properties?.NameDisplayDistance?.Float32 ?? 0) > 0;
+	});
+	check('над актёрами видно имя (Humanoid, не интерфейс)', named);
 }
 
 const scriptSource = source('ServerScriptService/StoryWorld.server.lua');

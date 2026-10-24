@@ -67,9 +67,10 @@ push(`<text x="${W - pad + 4}" y="${stripY + 18}" fill="#f97316" font-size="12">
 const planTop = 330;
 const planH = 250;
 push(`<text x="${pad}" y="${planTop - 24}" fill="#e8ecf6" font-size="19" font-weight="600">Как устроена одна комната</text>`);
-push(`<text x="${pad}" y="${planTop}" fill="#8b93a7" font-size="13">вид сверху: ${scenes[18]?.id ?? 'сцена'} · ${scenes[18]?.scene ?? ''} · реплики: ${(scenes[18]?.lines ?? []).map((l) => l.t).join(' / ')}</text>`);
+const plan = scenes.find((s) => s.id === 'vanya_fight') ?? scenes[18] ?? scenes[0];
+push(`<text x="${pad}" y="${planTop}" fill="#8b93a7" font-size="13">вид сверху: ${plan.id} · ${plan.scene} · реплики: ${(plan.lines ?? []).map((l) => l.t).join(' / ')}</text>`);
 
-const sample = scenes[18] ?? scenes[0];
+const sample = plan;
 const roomW = world.base.roomWidth;
 const sx = (v) => pad + 40 + ((v - (sample.center[0] - roomW / 2)) / roomW) * (W - pad * 2 - 80);
 const sz = (v) => planTop + 120 + (v - sample.center[2]) * 4;
@@ -83,12 +84,12 @@ const dot = (p, color, label, r = 9) => {
 
 dot(sample.arrival, '#7dd3fc', 'вход · сюда выбрасывает портал');
 (sample.actors ?? []).forEach((actor, i) => {
-	dot(actor.at, '#a3e635', `${actor.name} · лицом к игроку (${actor.facing}°)`, 11);
+	dot(actor.at, '#a3e635', `${actor.name}${actor.stance && actor.stance !== 'idle' ? ' · ' + actor.stance : ''}`, 11);
 });
 const signW = 12 * ((W - pad * 2 - 80) / roomW);
 push(`<rect x="${(sx(sample.sign[0]) - signW / 2).toFixed(1)}" y="${(sz(sample.sign[2]) - 4).toFixed(1)}" width="${signW.toFixed(1)}" height="8" rx="2" fill="#e2e8f0" fill-opacity="0.9"/>`);
-push(`<text x="${sx(sample.sign[0]).toFixed(1)}" y="${(sz(sample.sign[2]) - 10).toFixed(1)}" fill="#e2e8f0" font-size="12" text-anchor="middle">вывеска с текстом сцены</text>`);
-dot([sample.exit[0], sample.exit[2]], '#f97316', 'выход · портал дальше', 8);
+push(`<text x="${(sx(sample.sign[0]) + 150).toFixed(1)}" y="${(sz(sample.sign[2]) - 10).toFixed(1)}" fill="#e2e8f0" font-size="12">вывеска с текстом сцены</text>`);
+dot(sample.exit, '#f97316', 'выход · портал дальше', 8);
 
 // ось «вперёд»
 push(`<line x1="${sx(sample.arrival[0]).toFixed(1)}" y1="${(planTop + planH + 30).toFixed(1)}" x2="${sx(sample.exit[0]).toFixed(1)}" y2="${(planTop + planH + 30).toFixed(1)}" stroke="#2b3446" stroke-width="2" marker-end="url(#arrow)"/>`);

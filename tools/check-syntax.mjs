@@ -32,7 +32,9 @@ const ROBLOX_GLOBALS = [
 	'StarterGui', 'StarterPlayer', 'StarterPack', 'RunService', 'TweenService', 'UserInputService',
 	'HttpService', 'DataStoreService', 'CollectionService', 'SoundService', 'Lighting', 'MarketplaceService',
 	// подставляются раннером тестов перед запуском tests/engine_spec.luau
-	'StoryData', 'StoryEngine',
+	'StoryData', 'StoryEngine', 'Pose',
+	// подставляется tools/test-poses.mjs из tests/roblox_shim.luau
+	'r6', 'r15',
 ];
 
 const analysis = await Analysis.create({ mode: 'nocheck', lint: false, globals: ROBLOX_GLOBALS });
